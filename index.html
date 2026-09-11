@@ -127,7 +127,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .rail .who button{color:#8FA3B8;text-decoration:underline;font-size:12px;margin-top:6px}
 .tl .b{white-space:pre-wrap}
 th{white-space:nowrap}
-#v-mine td.items{line-height:1.9;white-space:nowrap}#v-mine td.items div,#v-mine td.pr div,#v-mine td.qt div{height:1.9em}
+#v-mine tr.sub td{border-bottom:0;padding-top:4px;padding-bottom:4px}#v-mine tr.grp td{padding-top:12px;padding-bottom:4px;border-bottom:0}#v-mine tr.last td{border-bottom:1px solid var(--line);padding-bottom:12px}#v-mine td.it{white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis}#v-mine td[rowspan]{vertical-align:top;border-bottom:1px solid var(--line);padding-top:12px}
 #v-mine td.num,#v-mine th.num{white-space:nowrap}
 .pc{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
 .pc h3{font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -291,7 +291,7 @@ function renderMine(){
   $('mine-sub').textContent=`${mine.length}개 · 월평균 매출 합계 ${fmtM(mine.reduce((a,s)=>a+s.mavg,0))}백만원`;
   $('mine-note').textContent=`월평균 = ${CLOSED[0].slice(0,4)}년 ${+CLOSED[0].slice(5)}~${+LASTM.slice(5)}월 마감 ${CLOSED.length}개월 기준 (${+ym(TODAY).slice(5)}월 제외) · 최근 단가 = 유상 거래 중 가장 최근 단가 · 입찰은 슬랙 #0-06입찰공고 및 입찰 트래커에서 거래처명 매칭`;
   const rows=mine.filter(s=>!q||(s.name+' '+s.items.join(' ')).toLowerCase().includes(q)).sort((a,b)=>b.mavg-a.mavg);
-  $('mine-body').innerHTML=rows.map(s=>`<tr class="row" onclick="openDetail('${esc(s.k)}')"><td><div class="name">${esc(s.name)}</div></td><td class="items">${s.istat.map(x=>`<div>${esc(x.i)}</div>`).join('')}</td><td class="num pr">${s.istat.map(x=>`<div>${x.last!=null?fmtP(x.last):'–'}</div>`).join('')}</td><td class="num qt">${s.istat.map(x=>`<div>${x.mq?fmtN(x.mq):'–'}</div>`).join('')}</td><td class="num">${fmtM(s.mavg)}</td><td>${s.bids.length?`<span class="pill">${s.bids.length}건</span>`:''}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">해당하는 거래처가 없습니다</td></tr>';
+  $('mine-body').innerHTML=rows.map(s=>{ const it=s.istat.length?s.istat:[{i:'–',last:null,mq:0}]; const n=it.length; return it.map((x,j)=>`<tr class="row ${j===0?'grp':'sub'} ${j===n-1?'last':''}" onclick="openDetail('${esc(s.k)}')">${j===0?`<td rowspan="${n}"><div class="name">${esc(s.name)}</div></td>`:''}<td class="it" title="${esc(x.i)}">${esc(x.i)}</td><td class="num">${x.last!=null?fmtP(x.last):'–'}</td><td class="num">${x.mq?fmtN(x.mq):'–'}</td>${j===0?`<td rowspan="${n}" class="num">${fmtM(s.mavg)}</td><td rowspan="${n}">${s.bids.length?`<span class="pill">${s.bids.length}건</span>`:''}</td>`:''}</tr>`).join(''); }).join('')||'<tr><td colspan="6" class="empty">해당하는 거래처가 없습니다</td></tr>';
 }
 function openDetail(k){ cur=SUP.find(s=>s.k===k); dtab='trade'; go('detail'); renderDetail(); }
 function monthTable(rowsSpec){ // rowsSpec: [{label, sub, cells:{ym:{q,p,a}}, tot}]
