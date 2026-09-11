@@ -126,8 +126,30 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .rail .who select{width:100%;margin-top:6px;padding:6px 8px;border-radius:6px;border:0;font:inherit;background:var(--navy-2);color:#fff}
 .rail .who button{color:#8FA3B8;text-decoration:underline;font-size:12px;margin-top:6px}
 .tl .b{white-space:pre-wrap}
+
+/* 좌측 레일 리파인 */
+.rail{background:linear-gradient(180deg,#0F2E4C 0%,#0B2339 100%);padding:26px 14px 18px;border-right:1px solid rgba(255,255,255,.06)}
+.brand{font-size:16px;font-weight:600;letter-spacing:.01em;color:#fff;padding:0 8px 18px;border-bottom:1px solid rgba(255,255,255,.09);position:relative}
+.brand::after{content:"";position:absolute;left:8px;bottom:-1px;width:26px;height:2px;background:var(--copper);border-radius:2px}
+.brand small{display:block;font-size:10.5px;font-weight:400;color:#7E93A8;margin-top:5px;letter-spacing:.01em}
+.nav{margin-top:18px;gap:1px}
+.nav button{padding:11px 12px;border-radius:8px;color:#AFC0D0;font-size:13.5px;font-weight:500;box-shadow:none;transition:background .12s,color .12s}
+.nav button:hover{background:rgba(255,255,255,.05);color:#E6EDF4}
+.nav button.on{background:rgba(255,255,255,.09);color:#fff;font-weight:600;box-shadow:inset 2px 0 0 var(--copper)}
+.rail .who{font-size:11.5px;color:#7E93A8;border-top:1px solid rgba(255,255,255,.09);padding:14px 8px 0;line-height:1.6}
+.rail .who b{color:#fff;font-weight:600;font-size:13px;letter-spacing:.01em}
+.rail .who select{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:#E6EDF4;font-size:12px;padding:7px 9px;border-radius:7px}
+.rail .who button{color:#7E93A8;text-decoration:none;font-size:11.5px;margin-top:8px;padding:0;border-bottom:1px solid rgba(255,255,255,.2)}
+.rail .who button:hover{color:#E6EDF4}
+.rail .who #asof{display:block;margin-top:5px;color:#6B8099}
 th{white-space:nowrap}
-#v-mine tr.sub td{border-bottom:0;padding-top:4px;padding-bottom:4px}#v-mine tr.grp td{padding-top:12px;padding-bottom:4px;border-bottom:0}#v-mine tr.last td{border-bottom:1px solid var(--line);padding-bottom:12px}#v-mine td.it{white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis}#v-mine td[rowspan]{vertical-align:top;border-bottom:1px solid var(--line);padding-top:12px}
+#v-mine td{border-bottom:0;padding-top:5px;padding-bottom:5px;font-size:13px}
+#v-mine tr.grp td{border-top:1px solid var(--line);padding-top:11px}
+#v-mine tr.grp:first-child td{border-top:0}
+#v-mine tr.last td{padding-bottom:11px}
+#v-mine td.it{white-space:nowrap;max-width:280px;overflow:hidden;text-overflow:ellipsis}
+#v-mine td.cust{white-space:nowrap;max-width:230px;overflow:hidden;text-overflow:ellipsis}
+#v-mine td.cust .name{font-size:13px;font-weight:700}
 #v-mine td.num,#v-mine th.num{white-space:nowrap}
 .pc{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
 .pc h3{font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -291,7 +313,7 @@ function renderMine(){
   $('mine-sub').textContent=`${mine.length}개 · 월평균 매출 합계 ${fmtM(mine.reduce((a,s)=>a+s.mavg,0))}백만원`;
   $('mine-note').textContent=`월평균 = ${CLOSED[0].slice(0,4)}년 ${+CLOSED[0].slice(5)}~${+LASTM.slice(5)}월 마감 ${CLOSED.length}개월 기준 (${+ym(TODAY).slice(5)}월 제외) · 최근 단가 = 유상 거래 중 가장 최근 단가 · 입찰은 슬랙 #0-06입찰공고 및 입찰 트래커에서 거래처명 매칭`;
   const rows=mine.filter(s=>!q||(s.name+' '+s.items.join(' ')).toLowerCase().includes(q)).sort((a,b)=>b.mavg-a.mavg);
-  $('mine-body').innerHTML=rows.map(s=>{ const it=s.istat.length?s.istat:[{i:'–',last:null,mq:0}]; const n=it.length; return it.map((x,j)=>`<tr class="row ${j===0?'grp':'sub'} ${j===n-1?'last':''}" onclick="openDetail('${esc(s.k)}')">${j===0?`<td rowspan="${n}"><div class="name">${esc(s.name)}</div></td>`:''}<td class="it" title="${esc(x.i)}">${esc(x.i)}</td><td class="num">${x.last!=null?fmtP(x.last):'–'}</td><td class="num">${x.mq?fmtN(x.mq):'–'}</td>${j===0?`<td rowspan="${n}" class="num">${fmtM(s.mavg)}</td><td rowspan="${n}">${s.bids.length?`<span class="pill">${s.bids.length}건</span>`:''}</td>`:''}</tr>`).join(''); }).join('')||'<tr><td colspan="6" class="empty">해당하는 거래처가 없습니다</td></tr>';
+  $('mine-body').innerHTML=rows.map(s=>{ const it=s.istat.length?s.istat:[{i:'–',last:null,mq:0}]; const n=it.length; return it.map((x,j)=>`<tr class="row ${j===0?'grp':''} ${j===n-1?'last':''}" onclick="openDetail('${esc(s.k)}')"><td class="cust" title="${esc(s.name)}">${j===0?`<span class="name">${esc(s.name)}</span>`:''}</td><td class="it" title="${esc(x.i)}">${esc(x.i)}</td><td class="num">${x.last!=null?fmtP(x.last):'–'}</td><td class="num">${x.mq?fmtN(x.mq):'–'}</td><td class="num">${j===0?fmtM(s.mavg):''}</td><td>${j===0&&s.bids.length?`<span class="pill">${s.bids.length}건</span>`:''}</td></tr>`).join(''); }).join('')||'<tr><td colspan="6" class="empty">해당하는 거래처가 없습니다</td></tr>';
 }
 function openDetail(k){ cur=SUP.find(s=>s.k===k); dtab='trade'; go('detail'); renderDetail(); }
 function monthTable(rowsSpec){ // rowsSpec: [{label, sub, cells:{ym:{q,p,a}}, tot}]
