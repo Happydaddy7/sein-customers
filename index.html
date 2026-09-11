@@ -127,46 +127,23 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .rail .who button{color:#8FA3B8;text-decoration:underline;font-size:12px;margin-top:6px}
 .tl .b{white-space:pre-wrap}
 
-/* 좌측 레일 리파인 */
-.rail{background:linear-gradient(180deg,#0F2E4C 0%,#0B2339 100%);padding:26px 14px 18px;border-right:1px solid rgba(255,255,255,.06)}
-.brand{font-size:16px;font-weight:600;letter-spacing:.01em;color:#fff;padding:0 8px 18px;border-bottom:1px solid rgba(255,255,255,.09);position:relative}
-.brand::after{content:"";position:absolute;left:8px;bottom:-1px;width:26px;height:2px;background:var(--copper);border-radius:2px}
-.brand small{display:block;font-size:10.5px;font-weight:400;color:#7E93A8;margin-top:5px;letter-spacing:.01em}
-.nav{margin-top:18px;gap:1px}
-.nav button{padding:11px 12px;border-radius:8px;color:#AFC0D0;font-size:13.5px;font-weight:500;box-shadow:none;transition:background .12s,color .12s}
-.nav button:hover{background:rgba(255,255,255,.05);color:#E6EDF4}
-.nav button.on{background:rgba(255,255,255,.09);color:#fff;font-weight:600;box-shadow:inset 2px 0 0 var(--copper)}
-.rail .who{font-size:11.5px;color:#7E93A8;border-top:1px solid rgba(255,255,255,.09);padding:14px 8px 0;line-height:1.6}
-.rail .who b{color:#fff;font-weight:600;font-size:13px;letter-spacing:.01em}
-.rail .who select{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:#E6EDF4;font-size:12px;padding:7px 9px;border-radius:7px}
-.rail .who button{color:#7E93A8;text-decoration:none;font-size:11.5px;margin-top:8px;padding:0;border-bottom:1px solid rgba(255,255,255,.2)}
-.rail .who button:hover{color:#E6EDF4}
-.rail .who #asof{display:block;margin-top:5px;color:#6B8099}
-th{white-space:nowrap}
-#v-mine td{border-bottom:0;padding-top:5px;padding-bottom:5px;font-size:13px}
-#v-mine tr.grp td{border-top:1px solid var(--line);padding-top:11px}
-#v-mine tr.grp:first-child td{border-top:0}
-#v-mine tr.last td{padding-bottom:11px}
-#v-mine td.it{white-space:nowrap;max-width:280px;overflow:hidden;text-overflow:ellipsis}
-#v-mine td.cust{white-space:nowrap;max-width:230px;overflow:hidden;text-overflow:ellipsis}
-#v-mine td.cust .name{font-size:13px;font-weight:700}
-#v-mine td.br,#v-mine th.br{border-right:1px solid var(--line);background:#FAF7F1}
-#v-mine td.br{font-weight:700}
-#v-mine th{vertical-align:bottom;line-height:1.35}
-#v-mine td.num,#v-mine th.num{white-space:nowrap}
-.pc{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
-.pc h3{font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.badge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600}.badge.up{background:#F6DEDA;color:#8F2E22}.badge.dn{background:#DCE8F3;color:#1F4E79}.badge.flat{background:#ECE7DD;color:var(--ink-2)}
-.pc .line{font-size:12px;color:var(--ink-2);margin:4px 0 8px}
-.pc svg{width:100%;height:150px;display:block}
-.dual,.bars{position:relative}.dual .b,.bars .b{cursor:crosshair}.dual .b:hover,.bars .b:hover{background:rgba(15,46,76,.05);border-radius:4px}.tip2{position:absolute;top:-4px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;font-size:12px;padding:5px 10px;border-radius:6px;white-space:nowrap;pointer-events:none;display:none;z-index:2}
-.pc .chart{position:relative}.pc .tip{position:absolute;top:6px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;font-size:12px;padding:5px 10px;border-radius:6px;white-space:nowrap;pointer-events:none;display:none;z-index:2}.pc .hit{fill:transparent;cursor:crosshair}.pc .hit:hover{fill:rgba(15,46,76,.06)}
-.pc .ax{font-size:10px;fill:#8a9099}
-.ptab{margin-top:14px}.ptab summary{cursor:pointer;font-size:13px;color:var(--navy);font-weight:600;padding:8px 0}
-.ptab table{font-size:12px}.ptab th,.ptab td{padding:6px 10px}
-.minor{font-size:12px;color:var(--ink-2);padding:8px 2px}
-.issue td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
-@media (max-width:900px){.items{grid-template-columns:1fr}.reps{grid-template-columns:repeat(2,1fr)}}
+/* 좌측 레일 */
+.app>.rail{background:#0A1F33;background-image:linear-gradient(165deg,#12314F 0%,#0A1F33 55%,#071726 100%);padding:30px 16px 20px;border-right:0;box-shadow:inset -1px 0 0 rgba(255,255,255,.05)}
+.app>.rail .brand{font-size:17px;font-weight:700;letter-spacing:-.01em;color:#fff;padding:0 6px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+.app>.rail .brand small{display:block;font-size:10px;font-weight:400;color:#6F87A0;margin-top:7px;letter-spacing:.02em;text-transform:none}
+.app>.rail .nav{margin-top:22px;display:flex;flex-direction:column;gap:2px}
+.app>.rail .nav button{position:relative;padding:11px 12px 11px 14px;border-radius:9px;color:#9FB3C6;font-size:13px;font-weight:500;letter-spacing:-.005em;background:none;box-shadow:none;transition:all .15s ease}
+.app>.rail .nav button:hover{background:rgba(255,255,255,.045);color:#DCE7F0}
+.app>.rail .nav button.on{background:rgba(255,255,255,.10);color:#fff;font-weight:600;box-shadow:none}
+.app>.rail .nav button.on::before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:16px;border-radius:0 3px 3px 0;background:var(--copper)}
+.app>.rail .who{margin-top:auto;padding:16px 6px 0;border-top:1px solid rgba(255,255,255,.08);font-size:11px;color:#6F87A0;line-height:1.7}
+.app>.rail .who b{display:block;color:#fff;font-weight:600;font-size:13.5px;letter-spacing:-.01em;margin-bottom:2px}
+.app>.rail .who select{width:100%;margin-top:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);color:#DCE7F0;font-size:12px;padding:8px 10px;border-radius:8px;appearance:none}
+.app>.rail .who select:hover{background:rgba(255,255,255,.10)}
+.app>.rail .who>button{display:inline-block;margin-top:10px;padding:0;color:#6F87A0;font-size:11px;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.18);background:none}
+.app>.rail .who>button:hover{color:#DCE7F0;border-color:rgba(255,255,255,.4)}
+.app>.rail .who #asof{display:block;margin-top:6px;color:#5B7189}
+
 </style>
 </head>
 <body>
@@ -206,7 +183,7 @@ th{white-space:nowrap}
       <div class="panel">
         <div class="filters"><input id="q" placeholder="거래처명·품목으로 찾기" oninput="renderMine()">
           </div>
-        <table><thead><tr><th>거래처</th><th class="num br">거래처 월평균<br>매출(백만원)</th><th>품목</th><th class="num">품목 최근<br>단가(원)</th><th class="num">품목 월평균<br>거래량</th></tr></thead><tbody id="mine-body"></tbody></table>
+        <table><thead><tr><th>거래처</th><th class="num br">월평균 매출<br>(백만원)</th><th>품목</th><th class="num">품목 최근<br>단가(원)</th><th class="num">품목 월평균<br>거래량</th></tr></thead><tbody id="mine-body"></tbody></table>
         <div class="note" id="mine-note"></div>
       </div>
     </section>
