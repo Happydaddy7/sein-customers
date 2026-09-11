@@ -127,7 +127,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .rail .who button{color:#8FA3B8;text-decoration:underline;font-size:12px;margin-top:6px}
 .tl .b{white-space:pre-wrap}
 th{white-space:nowrap}
-#v-mine td:nth-child(2){max-width:320px}
+#v-mine td.items{line-height:1.9;white-space:nowrap}#v-mine td.items div,#v-mine td.pr div,#v-mine td.qt div{height:1.9em}
 #v-mine td.num,#v-mine th.num{white-space:nowrap}
 .pc{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
 .pc h3{font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -181,8 +181,8 @@ th{white-space:nowrap}
       <div class="panel">
         <div class="filters"><input id="q" placeholder="거래처명·품목으로 찾기" oninput="renderMine()">
           </div>
-        <table><thead><tr><th>거래처</th><th>주요 품목</th><th>마지막 거래</th><th class="num">최근 3개월</th><th class="num">추이</th><th class="num">올해 누계 매출</th><th>입찰</th></tr></thead><tbody id="mine-body"></tbody></table>
-        <div class="note">금액 단위 백만원 · 추이는 직전 3개월 대비 · 입찰은 슬랙 #0-06입찰공고 및 입찰 트래커에서 거래처명 매칭</div>
+        <table><thead><tr><th>거래처</th><th>품목</th><th class="num">최근 단가(원)</th><th class="num">월평균 거래량</th><th class="num">월평균 매출(백만원)</th><th>입찰</th></tr></thead><tbody id="mine-body"></tbody></table>
+        <div class="note" id="mine-note"></div>
       </div>
     </section>
 
@@ -251,10 +251,13 @@ const SUP=Object.entries(byKey).map(([k,tx])=>{ const bu=tx[0].bu;
   if(!own) return null;
   const comps=[...new Set(tx.map(t=>t.co))].join('+');
   const items={}; for(const t of tx) items[t.i]=(items[t.i]||0)+t.a;
+  const st={}; for(const t of tx){ const o=(st[t.i]=st[t.i]||{q:0,last:null,ld:null}); if(CLOSED.includes(ym(t.d))) o.q+=t.q; if(t.p>0&&(!o.ld||t.d>o.ld)){o.last=t.p;o.ld=t.d;} }
   const sites=[...new Set(tx.map(t=>t.n))]; const bizs=[...new Set(tx.map(t=>t.c).filter(Boolean))];
   const s={k,bu,name:GNAME[k],own,comp:comps,ceo:[...new Set(tx.map(t=>t.ceo).filter(Boolean))].join(', '),addr:tx.find(t=>t.ad)?.ad||'',sites,bizs,first:tx.reduce((a,t)=>t.d<a?t.d:a,tx[0].d),tx:tx.sort((a,b)=>b.d-a.d),
     ytd:tx.reduce((a,t)=>a+t.a,0),q3:tx.filter(t=>t.d>=m3).reduce((a,t)=>a+t.a,0),qp:tx.filter(t=>t.d>=m6&&t.d<m3).reduce((a,t)=>a+t.a,0),
-    items:Object.entries(items).sort((a,b)=>b[1]-a[1]).map(x=>x[0])};
+    items:Object.entries(items).sort((a,b)=>b[1]-a[1]).map(x=>x[0]),
+    istat:Object.entries(items).sort((a,b)=>b[1]-a[1]).map(([i])=>({i,last:st[i].last,mq:st[i].q/CLOSED.length})),
+    mavg:tx.filter(t=>CLOSED.includes(ym(t.d))).reduce((a,t)=>a+t.a,0)/CLOSED.length};
   s.last=s.tx[0].d; s.age=days(s.last);
   s.bids=BIDS.filter(b=>s.sites.some(n=>matchBid(b.t,n))||matchBid(b.t,s.name)); return s;
 }).filter(Boolean);
@@ -285,9 +288,10 @@ function renderMine(){
   const q=$('q').value.toLowerCase();
   const mine=SUP.filter(s=>s.own===curRep&&s.bu===curBU);
   $('mine-title').textContent=`${curRep} 담당 거래처 · ${curBU}`;
-  $('mine-sub').textContent=`${mine.length}개 · 올해 누계 매출 ${fmtM(mine.reduce((a,s)=>a+s.ytd,0))}백만원 · 최근 3개월 ${fmtM(mine.reduce((a,s)=>a+s.q3,0))}백만원`;
-  const rows=mine.filter(s=>!q||(s.name+' '+s.items.join(' ')).toLowerCase().includes(q)).sort((a,b)=>b.q3-a.q3||b.ytd-a.ytd);
-  $('mine-body').innerHTML=rows.map(s=>`<tr class="row" onclick="openDetail('${esc(s.k)}')"><td><div class="name">${esc(s.name)}</div></td><td class="sub">${esc(s.items.slice(0,3).join(', '))}${s.items.length>3?` 외 ${s.items.length-3}`:''}</td><td>${ageHtml(s.age)}</td><td class="num">${fmtM(s.q3)}</td><td class="num"><span class="delta ${s.q3>s.qp?'down':s.q3<s.qp?'up':''}">${pct(s.q3,s.qp)}</span></td><td class="num">${fmtM(s.ytd)}</td><td>${s.bids.length?`<span class="pill">${s.bids.length}건</span>`:''}</td></tr>`).join('')||'<tr><td colspan="7" class="empty">해당하는 거래처가 없습니다</td></tr>';
+  $('mine-sub').textContent=`${mine.length}개 · 월평균 매출 합계 ${fmtM(mine.reduce((a,s)=>a+s.mavg,0))}백만원`;
+  $('mine-note').textContent=`월평균 = ${CLOSED[0].slice(0,4)}년 ${+CLOSED[0].slice(5)}~${+LASTM.slice(5)}월 마감 ${CLOSED.length}개월 기준 (${+ym(TODAY).slice(5)}월 제외) · 최근 단가 = 유상 거래 중 가장 최근 단가 · 입찰은 슬랙 #0-06입찰공고 및 입찰 트래커에서 거래처명 매칭`;
+  const rows=mine.filter(s=>!q||(s.name+' '+s.items.join(' ')).toLowerCase().includes(q)).sort((a,b)=>b.mavg-a.mavg);
+  $('mine-body').innerHTML=rows.map(s=>`<tr class="row" onclick="openDetail('${esc(s.k)}')"><td><div class="name">${esc(s.name)}</div></td><td class="items">${s.istat.map(x=>`<div>${esc(x.i)}</div>`).join('')}</td><td class="num pr">${s.istat.map(x=>`<div>${x.last!=null?fmtP(x.last):'–'}</div>`).join('')}</td><td class="num qt">${s.istat.map(x=>`<div>${x.mq?fmtN(x.mq):'–'}</div>`).join('')}</td><td class="num">${fmtM(s.mavg)}</td><td>${s.bids.length?`<span class="pill">${s.bids.length}건</span>`:''}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">해당하는 거래처가 없습니다</td></tr>';
 }
 function openDetail(k){ cur=SUP.find(s=>s.k===k); dtab='trade'; go('detail'); renderDetail(); }
 function monthTable(rowsSpec){ // rowsSpec: [{label, sub, cells:{ym:{q,p,a}}, tot}]
