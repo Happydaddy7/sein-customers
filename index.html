@@ -85,6 +85,15 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 
 .gate{min-height:100vh;background:var(--navy);display:flex;align-items:center;justify-content:center}
 .gate .card{background:var(--paper);width:560px;max-width:94vw;border-radius:12px;padding:32px}
+.install{display:flex;align-items:center;gap:12px;margin:0 0 20px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#FBF7F0;position:relative}
+.install .ic{width:34px;height:34px;border-radius:9px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:19px;flex:0 0 auto}
+.install .tx{flex:1;min-width:0;font-size:12px;color:var(--ink-2);line-height:1.5}
+.install .tx b{display:block;font-size:13.5px;color:var(--ink);margin-bottom:1px}
+.install .btn{flex:0 0 auto;padding:8px 14px}
+.install .x{position:absolute;top:4px;right:6px;color:var(--ink-2);font-size:17px;line-height:1;padding:4px}
+.guide{margin:0 0 20px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#FBF7F0;font-size:12px;color:var(--ink-2);line-height:1.7;position:relative}
+.guide b{color:var(--ink)}
+@media (max-width:520px){.install{flex-wrap:wrap}.install .btn{width:100%}}
 .gate h1{font-size:22px;margin-bottom:4px}.gate p{color:var(--ink-2);margin-bottom:18px}
 .reps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}.gate .cat{margin:6px 0 8px}
 .reps button{padding:16px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:700;font-size:15px}
@@ -192,6 +201,12 @@ th{white-space:nowrap}
     <h1>세인 고객관리</h1>
     <p id="gate-sub">본인 이름을 선택하세요 · 사료BU(원료)·뉴트리신(제품)으로 나뉘어 표시됩니다</p>
     <div class="reps" id="reps"></div>
+    <div class="install" id="install" style="display:none">
+      <div class="ic">＋</div>
+      <div class="tx"><b id="install-t">앱으로 설치하기</b><span id="install-d"></span></div>
+      <button class="btn primary" id="install-btn" onclick="doInstall()">설치</button>
+      <button class="x" onclick="closeInstall()" aria-label="닫기">×</button>
+    </div>
     <div class="adminrow">
       <span class="sub">관리자</span>
       <input id="pw" type="password" placeholder="관리자 비밀번호" onkeydown="if(event.key==='Enter')adminLogin()">
@@ -318,6 +333,21 @@ const SUP=Object.entries(byKey).map(([k,tx])=>{ const bu=tx[0].bu;
   s.bids=BIDS.filter(b=>s.sites.some(n=>matchBid(b.t,n))||matchBid(b.t,s.name)); return s;
 }).filter(Boolean);
 function matchBid(text,name){ for(const [kw,subs] of Object.entries(DATA.bidkw)){ if(text.includes(kw)&&subs.some(x=>name.includes(x))) return true; } return false; }
+
+// ===== 앱 설치 안내 =====
+let deferred=null;
+const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferred=e; showInstall('chrome'); });
+function showInstall(kind){
+  if(standalone()||sessionStorage.getItem('noinstall')) return;
+  const box=$('install');
+  if(kind==='chrome'){ $('install-d').textContent='홈 화면에 추가하면 앱처럼 바로 열립니다'; $('install-btn').style.display=''; box.style.display='flex'; return; }
+  const ios=/iPad|iPhone|iPod/.test(navigator.userAgent);
+  box.outerHTML=`<div class="guide" id="install"><b>앱처럼 쓰기</b>${ios?'사파리 아래쪽 <b>공유</b> 버튼 → <b>홈 화면에 추가</b>':'브라우저 메뉴(<b>⋮</b>) → <b>홈 화면에 추가</b> 또는 <b>앱 설치</b>'}를 누르면 홈 화면에 아이콘이 생깁니다<button class="x" onclick="closeInstall()">×</button></div>`;
+}
+async function doInstall(){ if(!deferred) return; deferred.prompt(); const r=await deferred.userChoice; deferred=null; if(r.outcome==='accepted') closeInstall(); }
+function closeInstall(){ sessionStorage.setItem('noinstall','1'); const b=$('install'); if(b) b.style.display='none'; }
+setTimeout(()=>{ if(!deferred&&!standalone()&&!sessionStorage.getItem('noinstall')) showInstall('manual'); },1200);
 
 // ===== 게이트 =====
 let ME=null, ADMIN=false, curRep='', curBU='사료BU', comp='', cur=null;
