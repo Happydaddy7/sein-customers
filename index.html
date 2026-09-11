@@ -6,12 +6,12 @@
 <link rel="manifest" href="app.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<meta name="theme-color" content="#0F2E4C">
+<meta name="theme-color" content="#2E4057">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="세인 고객관리">
 <style>
-:root{--navy:#202A38;--navy-2:#2D394A;--copper:#B87333;--copper-soft:#F1E3D3;--ivory:#F5EFE6;--paper:#FFFDF9;--ink:#1B1F24;--ink-2:#5B6570;--line:#E3DCCF;--ok:#3F7D5A;--warn:#C9922E;--late:#B84A3A}
+:root{--navy:#2E4057;--navy-2:#3D5573;--copper:#B87333;--copper-soft:#F1E3D3;--ivory:#F5EFE6;--paper:#FFFDF9;--ink:#1B1F24;--ink-2:#5B6570;--line:#E3DCCF;--ok:#3F7D5A;--warn:#C9922E;--late:#B84A3A}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",sans-serif;background:var(--ivory);color:var(--ink);font-size:14px;line-height:1.5}
 button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
@@ -22,7 +22,7 @@ a{color:inherit;text-decoration:none}
 .nav{margin-top:28px;display:flex;flex-direction:column;gap:2px}
 .nav button{display:block;width:100%;text-align:left;padding:10px 12px;border-radius:6px;color:#C4D0DC}
 .nav button.on{background:var(--navy-2);color:#fff;box-shadow:inset 3px 0 0 var(--copper)}.nav button:hover{background:var(--navy-2)}
-.rail .who{margin-top:auto;font-size:12px;color:#8FA3B8;border-top:1px solid #38475C;padding-top:14px}
+.rail .who{margin-top:auto;font-size:12px;color:#8FA3B8;border-top:1px solid #4A648A;padding-top:14px}
 .rail .who b{display:block;color:#DCE4EC;font-weight:600}.rail .who button{color:#8FA3B8;text-decoration:underline;font-size:12px;margin-top:4px}
 .main{padding:28px 36px 60px;max-width:1180px;width:100%}
 .top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px;gap:16px;flex-wrap:wrap}
@@ -107,6 +107,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .dual .b{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;height:100%}
 .dual .b i{width:100%;background:#C9D3DD;border-radius:3px 3px 0 0;display:block}.dual .b.cur i{background:var(--navy)}
 .dual .b em{font-style:normal;font-size:10.5px;color:var(--ink-2)}.dual .b small{font-size:10.5px;font-variant-numeric:tabular-nums}
+.legend{padding:2px 18px 10px;font-size:11.5px;color:var(--ink-2)}.legend i{display:inline-block;width:12px;height:8px;background:#C9D3DD;border-radius:2px;margin-right:4px;vertical-align:middle}.legend b{display:inline-block;width:12px;height:2px;background:var(--copper);margin:0 4px 3px 12px;vertical-align:middle}
 .dual svg{position:absolute;left:18px;right:18px;top:14px;height:96px;width:calc(100% - 36px);pointer-events:none;overflow:visible}
 .legend{padding:4px 18px 12px;font-size:11.5px;color:var(--ink-2)}.legend i{display:inline-block;width:12px;height:8px;background:#C9D3DD;border-radius:2px;margin-right:4px;vertical-align:middle}.legend b{display:inline-block;width:12px;height:2px;background:var(--copper);margin:0 4px 3px 12px;vertical-align:middle}
 .cat{margin:20px 0 8px;font-size:15px;font-weight:700;color:var(--navy);border-left:4px solid var(--copper);padding-left:10px}
@@ -140,8 +141,32 @@ th{white-space:nowrap}
 #v-mine th{vertical-align:bottom;line-height:1.35}
 #v-mine td.num,#v-mine th.num{white-space:nowrap}
 
+#v-mine td.br,#v-mine th.br{border-right:1px solid var(--line)}
+.pc{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.pc h3{font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.badge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600}.badge.up{background:#F6DEDA;color:#8F2E22}.badge.dn{background:#DCE8F3;color:#1F4E79}.badge.flat{background:#ECE7DD;color:var(--ink-2)}
+.pc .line{font-size:12px;color:var(--ink-2);margin:4px 0 8px}
+.pc svg{width:100%;height:auto;display:block}
+.pc .chart{position:relative}
+.pc .tip{position:absolute;top:4px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;font-size:12px;padding:5px 10px;border-radius:6px;white-space:nowrap;pointer-events:none;display:none;z-index:2}
+.pc .hit{fill:transparent;cursor:crosshair}.pc .hit:hover{fill:rgba(34,48,63,.06)}
+.dual,.bars{position:relative}
+.dual .b,.bars .b{cursor:crosshair;border-radius:4px}
+.dual .b:hover,.bars .b:hover{background:rgba(34,48,63,.05)}
+.tip2{position:absolute;top:-2px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;font-size:12px;padding:5px 10px;border-radius:6px;white-space:nowrap;pointer-events:none;display:none;z-index:3}
+.legend{padding:2px 18px 10px;font-size:11.5px;color:var(--ink-2)}.legend i{display:inline-block;width:12px;height:8px;background:#C9D3DD;border-radius:2px;margin-right:4px;vertical-align:middle}.legend b{display:inline-block;width:12px;height:2px;background:var(--copper);margin:0 4px 3px 12px;vertical-align:middle}
+.dual svg{position:absolute;left:18px;right:18px;top:14px;height:calc(100% - 32px);width:calc(100% - 36px);pointer-events:none;overflow:visible}
+.ptab{margin-top:14px}.ptab summary{cursor:pointer;font-size:13px;color:var(--navy);font-weight:600;padding:8px 14px}
+.cat{margin:20px 0 8px;font-size:15px;font-weight:700;color:var(--navy);border-left:4px solid var(--copper);padding-left:10px}
+.items{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.pc .ax{font-size:13px;fill:#8a9099}
+.ptab table{font-size:12px}.ptab th,.ptab td{padding:6px 10px}
+.minor{font-size:12px;color:var(--ink-2);padding:8px 2px}
+.issue td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+@media (max-width:900px){.items{grid-template-columns:1fr}.reps{grid-template-columns:repeat(2,1fr)}}
+
 /* 좌측 레일 */
-.app>.rail{background:#1C2836;background-image:linear-gradient(165deg,#2A3A4C 0%,#1C2836 55%,#161F2A 100%);padding:30px 16px 20px;border-right:0;box-shadow:inset -1px 0 0 rgba(255,255,255,.05)}
+.app>.rail{background:#2A3D57;background-image:linear-gradient(165deg,#3A5375 0%,#2A3D57 55%,#1F2E44 100%);padding:30px 16px 20px;border-right:0;box-shadow:inset -1px 0 0 rgba(255,255,255,.05)}
 .app>.rail .brand{font-size:17px;font-weight:700;letter-spacing:-.01em;color:#fff;padding:0 6px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
 .app>.rail .brand small{display:block;font-size:10px;font-weight:400;color:#6F87A0;margin-top:7px;letter-spacing:.02em;text-transform:none}
 .app>.rail .nav{margin-top:22px;display:flex;flex-direction:column;gap:2px}
@@ -336,7 +361,7 @@ function itemRows(tx){ // 품목별 월 셀: 수량 합, 평균단가(유상 행
   for(const r of Object.values(g)) for(const c of Object.values(r.cells)) c.p=c.pq>0?c.a/c.pq:null;
   return Object.values(g).sort((a,b)=>b.ytdA-a.ytdA);
 }
-function bars(series,cls){ const mx=Math.max(...series.map(x=>x[1]),1); return `<div class="bars"><div class="tip2"></div>${series.map(([m,v],i)=>`<div class="b ${i===series.length-1?'cur':''}" data-tip="${+m.slice(5)}월 매출 ${fmtM(v)}백만원"><small>${fmtM(v)}</small><i style="height:${Math.max(v/mx*100,2)}%"></i><em>${m.slice(5)}월</em></div>`).join('')}</div>`; }
+function bars(series,cls){ const mx=Math.max(...series.map(x=>x[1]),1); return `<div class="bars"><div class="tip2"></div>${series.map(([m,v],i)=>`<div class="b ${i===series.length-1?'cur':''}" data-tip="${+m.slice(5)}월 매출 ${fmtM(v)}백만원"><small>${fmtM(v)}</small><i style="height:${Math.max(v/mx*100,2)}%"></i><em>${+m.slice(5)}월</em></div>`).join('')}</div>`; }
 let dtab='trade';
 let bindTipsLater=false;
 document.querySelectorAll('#d-tabs button').forEach(b=>b.onclick=()=>{dtab=b.dataset.tab;push({v:'detail',k:cur.k,t:dtab});renderDetail();});
@@ -347,7 +372,7 @@ function itemCard(r){ // r: itemRows() 행 → 월별 수량 막대 + 단가 선
   const first=ps[0],last=ps[ps.length-1]; const ch=first&&last?(last-first)/first*100:null;
   return `<div class="item"><h3>${esc(r.label)}<span class="sub">올해 누계 ${fmtN(r.ytdQ)} · ${fmtM(r.ytdA)}백만원 ${ch!=null&&ps.length>1?`<span class="delta ${ch>0?'up':ch<0?'down':''}">단가 ${ch>0?'+':''}${ch.toFixed(0)}%</span>`:''}</span></h3>
     <div class="dual"><div class="tip2"></div>${ser.map(([m,q,p,a],i)=>`<div class="b ${i===ser.length-1?'cur':''}" data-tip="${+m.slice(5)}월 · 수량 ${q?fmtN(q):'–'} · 단가 ${p!=null?fmtP(p)+'원':'–'} · 매출 ${a?fmtM(a)+'백만원':'–'}"><i style="height:${Math.max(q/mx*100,1)}%"></i><em>${+m.slice(5)}월</em></div>`).join('')}
-    <svg viewBox="0 0 100 100" preserveAspectRatio="none">${pts.length>1?`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="#B87333" stroke-width="2.5" vector-effect="non-scaling-stroke"/>`:''}${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="1.6" fill="#B87333"/>`).join('')}</svg></div>
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none">${pts.length>1?`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="#B87333" stroke-width="2.5" vector-effect="non-scaling-stroke"/>`:''}${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#B87333" vector-effect="non-scaling-size"/>`).join('')}</svg></div>
     <div class="legend"><i></i>거래량 <b></b>평균단가</div>
     <table><thead><tr><th></th>${ser.map(x=>`<th class="num">${+x[0].slice(5)}월</th>`).join('')}</tr></thead><tbody><tr><td class="sub">거래량</td>${ser.map(x=>`<td class="num">${x[1]?fmtN(x[1]):'·'}</td>`).join('')}</tr><tr><td class="sub">단가</td>${ser.map(x=>`<td class="num">${x[2]!=null?fmtP(x[2]):'·'}</td>`).join('')}</tr><tr><td class="sub">매출</td>${ser.map(x=>`<td class="num">${x[3]?fmtM(x[3]):'·'}</td>`).join('')}</tr></tbody></table></div>`;
 }
@@ -427,15 +452,15 @@ function buildPrice(){
 const pct2=(v,c)=>c&&c.isNew?`${c.fmNew}월 신규`:v==null?'–':(Math.abs(v)<0.5?'보합':(v>0?'+':'')+Math.round(v)+'%');
 const bcls=v=>v==null?'flat':v>0.5?'up':v<-0.5?'dn':'flat';
 function pChart(c){ // 단가 선(좌) + 거래량 막대(우)
-  const W=320,H=150,L=44,R=44,T=12,B=22; const n=CLOSED.length; const iw=(W-L-R)/n;
+  const W=640,H=250,L=76,R=76,T=18,B=34; const n=CLOSED.length; const iw=(W-L-R)/n;
   const ps=c.price.filter(p=>p!=null); const pmin=Math.min(...ps)*0.9, pmax=Math.max(...ps)*1.05; const qmax=Math.max(...c.qs,1);
   const py=p=>T+(H-T-B)*(1-(p-pmin)/(pmax-pmin||1)); const qy=q=>T+(H-T-B)*(1-q/qmax);
   const bars=c.qs.map((q,i)=>`<rect x="${L+i*iw+iw*0.2}" y="${qy(q)}" width="${iw*0.6}" height="${H-B-qy(q)}" fill="#C9D3DD" rx="2"/>`).join('');
   const pts=c.price.map((p,i)=>p==null?null:`${L+i*iw+iw/2},${py(p)}`).filter(Boolean);
   const dots=c.price.map((p,i)=>p==null?'':`<circle cx="${L+i*iw+iw/2}" cy="${py(p)}" r="2.6" fill="#B87333"/>`).join('');
-  const xl=CLOSED.map((m,i)=>`<text class="ax" x="${L+i*iw+iw/2}" y="${H-6}" text-anchor="middle">${+m.slice(5)}월</text>`).join('');
+  const xl=CLOSED.map((m,i)=>`<text class="ax" x="${L+i*iw+iw/2}" y="${H-10}" text-anchor="middle">${+m.slice(5)}월</text>`).join('');
   const hits=CLOSED.map((m,i)=>`<rect class="hit" x="${L+i*iw}" y="${T}" width="${iw}" height="${H-T-B}" data-tip="${+m.slice(5)}월 · 단가 ${c.price[i]==null?'–':fmtP(c.price[i])+'원'} · 거래량 ${c.qs[i]?fmtN(c.qs[i]/1000)+'톤':'–'}"/>`).join('');
-  return `<div class="chart"><div class="tip"></div><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><text class="ax" x="2" y="${T+8}">${fmtP(pmax)}</text><text class="ax" x="2" y="${H-B}">${fmtP(pmin)}</text><text class="ax" x="${W-2}" y="${T+8}" text-anchor="end">${fmtN(qmax/1000)}t</text><text class="ax" x="${W-2}" y="${H-B}" text-anchor="end">0</text>${bars}<polyline points="${pts.join(' ')}" fill="none" stroke="#B87333" stroke-width="2.2"/>${dots}${xl}${hits}</svg></div>`;
+  return `<div class="chart"><div class="tip"></div><svg viewBox="0 0 ${W} ${H}"><text class="ax" x="4" y="${T+10}">${fmtP(pmax)}</text><text class="ax" x="4" y="${H-B}">${fmtP(pmin)}</text><text class="ax" x="${W-4}" y="${T+10}" text-anchor="end">${fmtN(qmax/1000)}t</text><text class="ax" x="${W-4}" y="${H-B}" text-anchor="end">0</text>${bars}<polyline points="${pts.join(' ')}" fill="none" stroke="#B87333" stroke-width="2.2"/>${dots}${xl}${hits}</svg></div>`;
 }
 function renderPrice(){
   const P=buildPrice(); const N=DATA.price_text||{};
