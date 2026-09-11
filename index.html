@@ -2,14 +2,14 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>세인 거래처 현황</title>
+<title>세인 고객관리</title>
 <link rel="manifest" href="app.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="theme-color" content="#0F2E4C">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="거래처현황">
+<meta name="apple-mobile-web-app-title" content="세인 고객관리">
 <style>
 :root{--navy:#0F2E4C;--navy-2:#173D62;--copper:#B87333;--copper-soft:#F1E3D3;--ivory:#F5EFE6;--paper:#FFFDF9;--ink:#1B1F24;--ink-2:#5B6570;--line:#E3DCCF;--ok:#3F7D5A;--warn:#C9922E;--late:#B84A3A}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -90,8 +90,10 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .reps button{padding:16px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:700;font-size:15px}
 .reps button:hover{border-color:var(--copper);background:var(--copper-soft)}
 .reps button small{display:block;font-weight:400;font-size:11px;color:var(--ink-2);margin-top:3px}
-.adminrow{display:flex;gap:8px;align-items:center;border-top:1px solid var(--line);padding-top:16px}
-.adminrow input{flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:6px;font:inherit}
+.adminrow{display:flex;gap:8px;align-items:center;border-top:1px solid var(--line);padding-top:16px;flex-wrap:wrap}
+.adminrow>.sub,.adminrow .btn{white-space:nowrap;flex:0 0 auto}
+.adminrow input{flex:1 1 140px;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:6px;font:inherit;font-size:16px}
+.gate .card{padding:28px 20px}
 .adminrow .err{flex-basis:100%;margin:0}
 .hidden{display:none!important}.view{display:none}.view.on{display:block}
 .sec{margin-bottom:16px}.sec h2 .sub{font-weight:400}
@@ -132,7 +134,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 
 <div id="gate" class="gate">
   <div class="card">
-    <h1>세인 거래처 현황</h1>
+    <h1>세인 고객관리</h1>
     <p id="gate-sub">본인 이름을 선택하세요 · 담당 거래처가 사료BU·뉴트리신으로 나뉘어 표시됩니다</p>
     <div class="reps" id="reps"></div>
     <div class="adminrow">
@@ -146,7 +148,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 
 <div id="app" class="app hidden">
   <aside class="rail">
-    <div class="brand">세인 거래처 현황<small id="brand-sub"></small></div>
+    <div class="brand">세인 고객관리<small id="brand-sub"></small></div>
     <nav class="nav">
       <button class="on" data-view="mine" id="nav-feed">사료BU 거래처</button>
       <button data-view="mine2" id="nav-nut">뉴트리신 거래처</button>

@@ -1,7 +1,7 @@
 {
-  "name": "세인 거래처 현황",
-  "short_name": "거래처현황",
-  "description": "세인바이오·세인비에스 영업담당별 거래처 현황",
+  "name": "세인 고객관리",
+  "short_name": "세인 고객관리",
+  "description": "세인바이오·세인비에스 영업담당별 고객(거래처) 관리",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -10,8 +10,21 @@
   "theme_color": "#0F2E4C",
   "lang": "ko",
   "icons": [
-    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
-    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
-    {"src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
