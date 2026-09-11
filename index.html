@@ -126,6 +126,19 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .rail .who select{width:100%;margin-top:6px;padding:6px 8px;border-radius:6px;border:0;font:inherit;background:var(--navy-2);color:#fff}
 .rail .who button{color:#8FA3B8;text-decoration:underline;font-size:12px;margin-top:6px}
 .tl .b{white-space:pre-wrap}
+.warn{display:inline-block;width:15px;height:15px;line-height:15px;text-align:center;border-radius:50%;background:#F0DAD4;color:#B84A3A;font-size:10px;font-weight:700;cursor:help;vertical-align:1px}
+th{white-space:nowrap}
+#v-mine td{border-bottom:0;padding-top:5px;padding-bottom:5px;font-size:13px}
+#v-mine tr.grp td{border-top:1px solid var(--line);padding-top:11px}
+#v-mine tr.grp:first-child td{border-top:0}
+#v-mine tr.last td{padding-bottom:11px}
+#v-mine td.it{white-space:nowrap;max-width:280px;overflow:hidden;text-overflow:ellipsis}
+#v-mine td.cust{white-space:nowrap;max-width:230px;overflow:hidden;text-overflow:ellipsis}
+#v-mine td.cust .name{font-size:13px;font-weight:700}
+#v-mine td.br,#v-mine th.br{border-right:1px solid var(--line);background:#FAF7F1}
+#v-mine td.br{font-weight:700}
+#v-mine th{vertical-align:bottom;line-height:1.35}
+#v-mine td.num,#v-mine th.num{white-space:nowrap}
 
 /* 좌측 레일 */
 .app>.rail{background:#0A1F33;background-image:linear-gradient(165deg,#12314F 0%,#0A1F33 55%,#071726 100%);padding:30px 16px 20px;border-right:0;box-shadow:inset -1px 0 0 rgba(255,255,255,.05)}
@@ -253,12 +266,13 @@ const SUP=Object.entries(byKey).map(([k,tx])=>{ const bu=tx[0].bu;
   if(!own) return null;
   const comps=[...new Set(tx.map(t=>t.co))].join('+');
   const items={}; for(const t of tx) items[t.i]=(items[t.i]||0)+t.a;
-  const st={}; for(const t of tx){ const o=(st[t.i]=st[t.i]||{q:0,last:null,ld:null}); if(CLOSED.includes(ym(t.d))) o.q+=t.q; if(t.p>0&&(!o.ld||t.d>o.ld)){o.last=t.p;o.ld=t.d;} }
+  const st={}; for(const t of tx){ const o=(st[t.i]=st[t.i]||{q:0,ps:[]}); if(CLOSED.includes(ym(t.d))) o.q+=t.q; if(t.p>0) o.ps.push({p:t.p,d:t.d}); }
+  for(const o of Object.values(st)){ o.ps.sort((a,b)=>b.d-a.d); o.last=o.ps[0]?.p??null; o.ld=o.ps[0]?.d??null; const pr=o.ps.find(x=>x.p!==o.last); o.prev=pr?pr.p:null; o.odd=o.prev!=null&&Math.abs(o.last-o.prev)/o.prev>0.15; }
   const sites=[...new Set(tx.map(t=>t.n))]; const bizs=[...new Set(tx.map(t=>t.c).filter(Boolean))];
   const s={k,bu,name:GNAME[k],own,comp:comps,ceo:[...new Set(tx.map(t=>t.ceo).filter(Boolean))].join(', '),addr:tx.find(t=>t.ad)?.ad||'',sites,bizs,first:tx.reduce((a,t)=>t.d<a?t.d:a,tx[0].d),tx:tx.sort((a,b)=>b.d-a.d),
     ytd:tx.reduce((a,t)=>a+t.a,0),q3:tx.filter(t=>t.d>=m3).reduce((a,t)=>a+t.a,0),qp:tx.filter(t=>t.d>=m6&&t.d<m3).reduce((a,t)=>a+t.a,0),
     items:Object.entries(items).sort((a,b)=>b[1]-a[1]).map(x=>x[0]),
-    istat:Object.entries(items).sort((a,b)=>b[1]-a[1]).map(([i])=>({i,last:st[i].last,mq:st[i].q/CLOSED.length})),
+    istat:Object.entries(items).sort((a,b)=>b[1]-a[1]).map(([i])=>({i,last:st[i].last,ld:st[i].ld,prev:st[i].prev,odd:st[i].odd,mq:st[i].q/CLOSED.length})),
     mavg:tx.filter(t=>CLOSED.includes(ym(t.d))).reduce((a,t)=>a+t.a,0)/CLOSED.length};
   s.last=s.tx[0].d; s.age=days(s.last);
   s.bids=BIDS.filter(b=>s.sites.some(n=>matchBid(b.t,n))||matchBid(b.t,s.name)); return s;
@@ -291,9 +305,9 @@ function renderMine(){
   const mine=SUP.filter(s=>s.own===curRep&&s.bu===curBU);
   $('mine-title').textContent=`${curRep} 담당 거래처 · ${curBU}`;
   $('mine-sub').textContent=`${mine.length}개 · 월평균 매출 합계 ${fmtM(mine.reduce((a,s)=>a+s.mavg,0))}백만원`;
-  $('mine-note').textContent=`월평균 = ${CLOSED[0].slice(0,4)}년 ${+CLOSED[0].slice(5)}~${+LASTM.slice(5)}월 마감 ${CLOSED.length}개월 기준 (${+ym(TODAY).slice(5)}월 제외) · 최근 단가 = 유상 거래 중 가장 최근 단가 · 입찰은 슬랙 #0-06입찰공고 및 입찰 트래커에서 거래처명 매칭`;
+  $('mine-note').textContent=`월평균 = ${CLOSED[0].slice(0,4)}년 ${+CLOSED[0].slice(5)}~${+LASTM.slice(5)}월 마감 ${CLOSED.length}개월 기준 (${+ym(TODAY).slice(5)}월 제외) · 최근 단가 = 유상 거래 중 가장 최근 단가(마우스를 올리면 거래일·직전 단가, ! 는 직전 대비 15% 이상 차이) · 입찰은 슬랙 #0-06입찰공고 및 입찰 트래커에서 거래처명 매칭`;
   const rows=mine.filter(s=>!q||(s.name+' '+s.items.join(' ')).toLowerCase().includes(q)).sort((a,b)=>b.mavg-a.mavg);
-  $('mine-body').innerHTML=rows.map(s=>{ const it=s.istat.length?s.istat:[{i:'–',last:null,mq:0}]; const n=it.length; return it.map((x,j)=>`<tr class="row ${j===0?'grp':''} ${j===n-1?'last':''}" onclick="openDetail('${esc(s.k)}')"><td class="cust" title="${esc(s.name)}">${j===0?`<span class="name">${esc(s.name)}</span>`:''}</td><td class="num br">${j===0?fmtM(s.mavg):''}</td><td class="it" title="${esc(x.i)}">${esc(x.i)}</td><td class="num">${x.last!=null?fmtP(x.last):'–'}</td><td class="num">${x.mq?fmtN(x.mq):'–'}</td></tr>`).join(''); }).join('')||'<tr><td colspan="5" class="empty">해당하는 거래처가 없습니다</td></tr>';
+  $('mine-body').innerHTML=rows.map(s=>{ const it=s.istat.length?s.istat:[{i:'–',last:null,mq:0}]; const n=it.length; return it.map((x,j)=>`<tr class="row ${j===0?'grp':''} ${j===n-1?'last':''}" onclick="openDetail('${esc(s.k)}')"><td class="cust" title="${esc(s.name)}">${j===0?`<span class="name">${esc(s.name)}</span>`:''}</td><td class="num br">${j===0?fmtM(s.mavg):''}</td><td class="it" title="${esc(x.i)}">${esc(x.i)}</td><td class="num" title="${x.last!=null?`${fmtDate(x.ld)} 거래 단가${x.prev!=null?` · 직전 ${fmtP(x.prev)}원`:''}`:''}">${x.last!=null?fmtP(x.last)+(x.odd?' <span class="warn" title="직전 단가와 15% 이상 차이 — ERP 입력 확인 필요">!</span>':''):'–'}</td><td class="num">${x.mq?fmtN(x.mq):'–'}</td></tr>`).join(''); }).join('')||'<tr><td colspan="5" class="empty">해당하는 거래처가 없습니다</td></tr>';
 }
 function openDetail(k){ cur=SUP.find(s=>s.k===k); dtab='trade'; go('detail'); renderDetail(); }
 function monthTable(rowsSpec){ // rowsSpec: [{label, sub, cells:{ym:{q,p,a}}, tot}]
