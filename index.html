@@ -134,6 +134,7 @@ th{white-space:nowrap}
 .badge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600}.badge.up{background:#F6DEDA;color:#8F2E22}.badge.dn{background:#DCE8F3;color:#1F4E79}.badge.flat{background:#ECE7DD;color:var(--ink-2)}
 .pc .line{font-size:12px;color:var(--ink-2);margin:4px 0 8px}
 .pc svg{width:100%;height:150px;display:block}
+.dual,.bars{position:relative}.dual .b,.bars .b{cursor:crosshair}.dual .b:hover,.bars .b:hover{background:rgba(15,46,76,.05);border-radius:4px}.tip2{position:absolute;top:-4px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;font-size:12px;padding:5px 10px;border-radius:6px;white-space:nowrap;pointer-events:none;display:none;z-index:2}
 .pc .chart{position:relative}.pc .tip{position:absolute;top:6px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;font-size:12px;padding:5px 10px;border-radius:6px;white-space:nowrap;pointer-events:none;display:none;z-index:2}.pc .hit{fill:transparent;cursor:crosshair}.pc .hit:hover{fill:rgba(15,46,76,.06)}
 .pc .ax{font-size:10px;fill:#8a9099}
 .ptab{margin-top:14px}.ptab summary{cursor:pointer;font-size:13px;color:var(--navy);font-weight:600;padding:8px 0}
@@ -297,8 +298,9 @@ function itemRows(tx){ // 품목별 월 셀: 수량 합, 평균단가(유상 행
   for(const r of Object.values(g)) for(const c of Object.values(r.cells)) c.p=c.pq>0?c.a/c.pq:null;
   return Object.values(g).sort((a,b)=>b.ytdA-a.ytdA);
 }
-function bars(series,cls){ const mx=Math.max(...series.map(x=>x[1]),1); return `<div class="bars">${series.map(([m,v],i)=>`<div class="b ${i===series.length-1?'cur':''}"><small>${fmtM(v)}</small><i style="height:${Math.max(v/mx*100,2)}%"></i><em>${m.slice(5)}월</em></div>`).join('')}</div>`; }
+function bars(series,cls){ const mx=Math.max(...series.map(x=>x[1]),1); return `<div class="bars"><div class="tip2"></div>${series.map(([m,v],i)=>`<div class="b ${i===series.length-1?'cur':''}" data-tip="${+m.slice(5)}월 매출 ${fmtM(v)}백만원"><small>${fmtM(v)}</small><i style="height:${Math.max(v/mx*100,2)}%"></i><em>${m.slice(5)}월</em></div>`).join('')}</div>`; }
 let dtab='trade';
+let bindTipsLater=false;
 document.querySelectorAll('#d-tabs button').forEach(b=>b.onclick=()=>{dtab=b.dataset.tab;renderDetail();});
 function itemCard(r){ // r: itemRows() 행 → 월별 수량 막대 + 단가 선 + 표
   const ser=MONTHS.map(m=>[m,r.cells[m]?r.cells[m].q:0,r.cells[m]?r.cells[m].p:null,r.cells[m]?r.cells[m].a:0]);
@@ -306,11 +308,12 @@ function itemCard(r){ // r: itemRows() 행 → 월별 수량 막대 + 단가 선
   const pts=ser.map((x,i)=>x[2]==null?null:[(i+0.5)/ser.length*100,pmax===pmin?50:100-((x[2]-pmin)/(pmax-pmin))*100]).filter(Boolean);
   const first=ps[0],last=ps[ps.length-1]; const ch=first&&last?(last-first)/first*100:null;
   return `<div class="item"><h3>${esc(r.label)}<span class="sub">올해 누계 ${fmtN(r.ytdQ)} · ${fmtM(r.ytdA)}백만원 ${ch!=null&&ps.length>1?`<span class="delta ${ch>0?'up':ch<0?'down':''}">단가 ${ch>0?'+':''}${ch.toFixed(0)}%</span>`:''}</span></h3>
-    <div class="dual">${ser.map(([m,q],i)=>`<div class="b ${i===ser.length-1?'cur':''}"><i style="height:${Math.max(q/mx*100,1)}%"></i><em>${+m.slice(5)}월</em></div>`).join('')}
+    <div class="dual"><div class="tip2"></div>${ser.map(([m,q,p,a],i)=>`<div class="b ${i===ser.length-1?'cur':''}" data-tip="${+m.slice(5)}월 · 수량 ${q?fmtN(q):'–'} · 단가 ${p!=null?fmtP(p)+'원':'–'} · 매출 ${a?fmtM(a)+'백만원':'–'}"><i style="height:${Math.max(q/mx*100,1)}%"></i><em>${+m.slice(5)}월</em></div>`).join('')}
     <svg viewBox="0 0 100 100" preserveAspectRatio="none">${pts.length>1?`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="#B87333" stroke-width="2.5" vector-effect="non-scaling-stroke"/>`:''}${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="1.6" fill="#B87333"/>`).join('')}</svg></div>
     <div class="legend"><i></i>거래량 <b></b>평균단가</div>
     <table><thead><tr><th></th>${ser.map(x=>`<th class="num">${+x[0].slice(5)}월</th>`).join('')}</tr></thead><tbody><tr><td class="sub">거래량</td>${ser.map(x=>`<td class="num">${x[1]?fmtN(x[1]):'·'}</td>`).join('')}</tr><tr><td class="sub">단가</td>${ser.map(x=>`<td class="num">${x[2]!=null?fmtP(x[2]):'·'}</td>`).join('')}</tr><tr><td class="sub">매출</td>${ser.map(x=>`<td class="num">${x[3]?fmtM(x[3]):'·'}</td>`).join('')}</tr></tbody></table></div>`;
 }
+function bindTips(root){ root.querySelectorAll('[data-tip]').forEach(el=>{ const box=el.closest('.dual,.bars,.chart'); const tip=box&&box.querySelector('.tip2,.tip'); if(!tip) return; const show=()=>{tip.textContent=el.dataset.tip;tip.style.display='block';}; el.addEventListener('mouseenter',show); el.addEventListener('touchstart',show,{passive:true}); el.addEventListener('mouseleave',()=>tip.style.display='none'); }); }
 function renderDetail(){
   const s=cur; document.querySelectorAll('#d-tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===dtab));
   $('d-head').innerHTML=`<div><h1>${esc(s.name)}</h1><div class="meta"><div><b>담당자</b><span class="own me">${esc(s.own)}</span></div><div><b>부문</b>${s.bu}</div><div><b>거래 품목</b>${s.items.length}개</div><div><b>사업장</b>${s.sites.length}곳</div><div><b>입찰</b>${s.bids.length}건</div></div></div><div class="kpi"><div><div class="n">${s.age}일</div><div class="l">마지막 거래</div></div><div><div class="n">${fmtM(s.q3)}</div><div class="l">최근 3개월</div></div><div><div class="n">${fmtM(s.ytd)}</div><div class="l">올해 누계 매출(백만원)</div></div></div>`;
@@ -331,10 +334,12 @@ function renderDetail(){
     const memos=[]; const seen=new Set(); for(const t of s.tx){ if(t.m&&!seen.has(t.m)){ seen.add(t.m); memos.push(t); } if(memos.length>=40) break; }
     b.innerHTML=`<div class="panel"><h2>거래 메모 <span class="sub">· ERP 적요, 최근순</span></h2><ul class="tl">${memos.map(t=>`<li><div class="d">${fmtDate(t.d)}</div><div class="dot"></div><div><div class="t">${esc(t.i)} <span class="sub">· ${fmtN(t.q)} × ${fmtP(t.p)}원 · ${esc(t.n)}</span></div><div class="b">${esc(t.m)}</div></div></li>`).join('')||'<li><div></div><div></div><div class="sub">적요 메모가 없습니다</div></li>'}</ul></div>`;
   }
+  bindTipsLater=true;
   if(dtab==='info'){
     b.innerHTML=`<div class="panel"><h2>회사 정보</h2><table><tbody><tr><td class="sub w">거래처명</td><td>${esc(s.name)}</td></tr><tr><td class="sub">사업장</td><td>${s.sites.map(esc).join('<br>')}</td></tr><tr><td class="sub">사업자번호</td><td>${s.bizs.map(esc).join(', ')||'-'}</td></tr><tr><td class="sub">대표자</td><td>${esc(s.ceo||'-')}</td></tr><tr><td class="sub">주소</td><td>${esc(s.addr||'-')}</td></tr><tr><td class="sub">부문</td><td>${s.bu}</td></tr><tr><td class="sub">담당자</td><td>${esc(s.own)} <span class="sub">· ${s.bu} 실적 기준 자동 산정</span></td></tr><tr><td class="sub">올해 첫 거래</td><td>${fmtDate(s.first)}</td></tr><tr><td class="sub">거래 품목</td><td>${s.items.map(esc).join(', ')}</td></tr></tbody></table></div>`;
   }
 }
+const _rd=renderDetail; renderDetail=function(){ _rd(); bindTips($('d-body')); };
 // ===== 뉴트리신 =====
 const FAM=[['나노비타믹스E',/나노비타믹스\s?E/],['나노비타믹스',/나노비타믹스/],['나노비타쎄',/나노비타쎄/],['나노비타블럭',/나노비타블럭/],['하우린',/하우린|Haurin/],['장프로',/장프로/],['닥터N',/닥터N|닥터엔|Doctor N/],['이지스타터',/이지스타터/],['초유아이지',/초유아이지/],['설사72',/설사72/],['세인파인애플',/세인파인애플/]];
 const famOf=i=>{ for(const [f,re] of FAM) if(re.test(i)) return f; return null; };
