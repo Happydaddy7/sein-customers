@@ -168,7 +168,8 @@ th{white-space:nowrap}
 .ptab{margin-top:14px}.ptab summary{cursor:pointer;font-size:13px;color:var(--navy);font-weight:600;padding:8px 14px}
 .cat{margin:20px 0 8px;font-size:15px;font-weight:700;color:var(--navy);border-left:4px solid var(--copper);padding-left:10px}
 .items{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
-.pc .ax{font-size:13px;fill:#8a9099}
+.pc .ax{font-size:12.5px;fill:#93999F}
+.pc .hit{fill:transparent;cursor:crosshair}.pc .hit:hover{fill:rgba(46,64,87,.05)}
 .ptab table{font-size:12px}.ptab th,.ptab td{padding:6px 10px}
 .minor{font-size:12px;color:var(--ink-2);padding:8px 2px}
 .issue td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -236,7 +237,7 @@ th{white-space:nowrap}
       <div class="panel">
         <div class="filters"><input id="q" placeholder="거래처명·품목으로 찾기" oninput="renderMine()">
           </div>
-        <table><thead><tr><th>거래처</th><th class="num br">월평균 매출<br>(백만원)</th><th>품목</th><th class="num">품목 최근<br>단가(원)</th><th class="num">품목 월평균<br>거래량</th></tr></thead><tbody id="mine-body"></tbody></table>
+        <table><thead><tr><th>거래처</th><th class="num br">월평균 매출<br>(백만원)</th><th>품목</th><th class="num">품목 최근<br>단가(원/kg)</th><th class="num">품목 월평균<br>거래량(kg)</th></tr></thead><tbody id="mine-body"></tbody></table>
         <div class="note" id="mine-note"></div>
       </div>
     </section>
@@ -380,11 +381,11 @@ function renderMine(){
   $('mine-sub').textContent=`${mine.length}개 · 월평균 매출 합계 ${fmtM(mine.reduce((a,s)=>a+s.mavg,0))}백만원`;
   $('mine-note').textContent=`월평균 = ${CLOSED[0].slice(0,4)}년 ${+CLOSED[0].slice(5)}~${+LASTM.slice(5)}월 마감 ${CLOSED.length}개월 기준 (${+ym(TODAY).slice(5)}월 제외) · 최근 단가 = 유상 거래 중 가장 최근 단가(마우스를 올리면 거래일·직전 단가, ! 는 직전 대비 15% 이상 차이) · 입찰은 슬랙 #0-06입찰공고 및 입찰 트래커에서 거래처명 매칭`;
   const rows=mine.filter(s=>!q||(s.name+' '+s.items.join(' ')).toLowerCase().includes(q)).sort((a,b)=>b.mavg-a.mavg);
-  $('mine-body').innerHTML=rows.map(s=>{ const it=s.istat.length?s.istat:[{i:'–',last:null,mq:0}]; const n=it.length; return it.map((x,j)=>`<tr class="row ${j===0?'grp':''} ${j===n-1?'last':''}" onclick="openDetail('${esc(s.k)}')"><td class="cust" title="${esc(s.name)}">${j===0?`<span class="name">${esc(s.name)}</span>`:''}</td><td class="num br">${j===0?fmtM(s.mavg):''}</td><td class="it" title="${esc(x.i)}">${esc(x.i)}</td><td class="num" title="${x.last!=null?`${fmtDate(x.ld)} 거래 단가${x.prev!=null?` · 직전 ${fmtP(x.prev)}원`:''}`:''}">${x.last!=null?fmtP(x.last)+(x.odd?' <span class="warn" title="직전 단가와 15% 이상 차이 — ERP 입력 확인 필요">!</span>':''):'–'}</td><td class="num">${x.mq?fmtN(x.mq):'–'}</td></tr>`).join(''); }).join('')||'<tr><td colspan="5" class="empty">해당하는 거래처가 없습니다</td></tr>';
+  $('mine-body').innerHTML=rows.map(s=>{ const it=s.istat.length?s.istat:[{i:'–',last:null,mq:0}]; const n=it.length; return it.map((x,j)=>`<tr class="row ${j===0?'grp':''} ${j===n-1?'last':''}" onclick="openDetail('${esc(s.k)}')"><td class="cust" title="${esc(s.name)}">${j===0?`<span class="name">${esc(s.name)}</span>`:''}</td><td class="num br">${j===0?fmtM(s.mavg):''}</td><td class="it" title="${esc(x.i)}">${esc(x.i)}</td><td class="num" title="${x.last!=null?`${fmtDate(x.ld)} 거래 단가${x.prev!=null?` · 직전 ${fmtP(x.prev)}원`:''}`:''}">${x.last!=null?fmtP(x.last)+(x.odd?' <span class="warn" title="직전 단가와 15% 이상 차이 — ERP 입력 확인 필요">!</span>':''):'–'}</td><td class="num">${x.mq?fmtN(x.mq)+' kg':'–'}</td></tr>`).join(''); }).join('')||'<tr><td colspan="5" class="empty">해당하는 거래처가 없습니다</td></tr>';
 }
 function openDetail(k){ cur=SUP.find(s=>s.k===k); dtab='trade'; go('detail',true); push({v:'detail',k,t:dtab}); renderDetail(); }
 function monthTable(rowsSpec){ // rowsSpec: [{label, sub, cells:{ym:{q,p,a}}, tot}]
-  return `<table><thead><tr><th>품목</th>${MONTHS.map(m=>`<th class="num">${m.slice(2,4)}.${m.slice(5)}${m>=ym(TODAY)?'<span class="pill">진행</span>':''}</th>`).join('')}<th class="num">올해 누계 수량</th><th class="num">올해 누계 매출</th></tr></thead><tbody>${rowsSpec.map(r=>`<tr class="${r.tot?'tot':''}"><td class="name">${esc(r.label)}${r.sub?`<div class="sub">${esc(r.sub)}</div>`:''}</td>${MONTHS.map(m=>{const c=r.cells[m];return `<td class="num">${c?fmtN(c.q)+(c.p!=null?`<div class="p">${fmtP(c.p)}</div>`:'<div class="p">-</div>'):'<span class="sub">·</span>'}</td>`;}).join('')}<td class="num">${fmtN(r.ytdQ)}</td><td class="num">${fmtM(r.ytdA)}</td></tr>`).join('')}</tbody></table>`;
+  return `<table><thead><tr><th>품목</th>${MONTHS.map(m=>`<th class="num">${m.slice(2,4)}.${m.slice(5)}${m>=ym(TODAY)?'<span class="pill">진행</span>':''}</th>`).join('')}<th class="num">올해 누계<br>거래량(kg)</th><th class="num">올해 누계<br>매출(백만원)</th></tr></thead><tbody>${rowsSpec.map(r=>`<tr class="${r.tot?'tot':''}"><td class="name">${esc(r.label)}${r.sub?`<div class="sub">${esc(r.sub)}</div>`:''}</td>${MONTHS.map(m=>{const c=r.cells[m];return `<td class="num">${c?fmtN(c.q)+(c.p!=null?`<div class="p">${fmtP(c.p)}</div>`:'<div class="p">-</div>'):'<span class="sub">·</span>'}</td>`;}).join('')}<td class="num">${fmtN(r.ytdQ)}</td><td class="num">${fmtM(r.ytdA)}</td></tr>`).join('')}</tbody></table>`;
 }
 function itemRows(tx){ // 품목별 월 셀: 수량 합, 평균단가(유상 행 가중)
   const g={}; for(const t of tx){ const r=(g[t.i]=g[t.i]||{label:t.i,cells:{},ytdQ:0,ytdA:0}); const c=(r.cells[ym(t.d)]=r.cells[ym(t.d)]||{q:0,a:0,pq:0}); c.q+=t.q; c.a+=t.a; if(t.p!=null&&t.p>0){c.pq+=t.q;} r.ytdQ+=t.q; r.ytdA+=t.a; }
@@ -395,18 +396,40 @@ function bars(series,cls){ const mx=Math.max(...series.map(x=>x[1]),1); return `
 let dtab='trade';
 let bindTipsLater=false;
 document.querySelectorAll('#d-tabs button').forEach(b=>b.onclick=()=>{dtab=b.dataset.tab;push({v:'detail',k:cur.k,t:dtab});renderDetail();});
-function itemCard(r){ // r: itemRows() 행 → 월별 수량 막대 + 단가 선 + 표
-  const ser=MONTHS.map(m=>[m,r.cells[m]?r.cells[m].q:0,r.cells[m]?r.cells[m].p:null,r.cells[m]?r.cells[m].a:0]);
-  const mx=Math.max(...ser.map(x=>x[1]),1); const ps=ser.filter(x=>x[2]!=null).map(x=>x[2]); const pmin=Math.min(...ps),pmax=Math.max(...ps);
-  const pts=ser.map((x,i)=>x[2]==null?null:[(i+0.5)/ser.length*100,pmax===pmin?50:100-((x[2]-pmin)/(pmax-pmin))*100]).filter(Boolean);
-  const first=ps[0],last=ps[ps.length-1]; const ch=first&&last?(last-first)/first*100:null;
-  return `<div class="item"><h3>${esc(r.label)}<span class="sub">올해 누계 ${fmtN(r.ytdQ)} · ${fmtM(r.ytdA)}백만원 ${ch!=null&&ps.length>1?`<span class="delta ${ch>0?'up':ch<0?'down':''}">단가 ${ch>0?'+':''}${ch.toFixed(0)}%</span>`:''}</span></h3>
-    <div class="dual"><div class="tip2"></div>${ser.map(([m,q,p,a],i)=>`<div class="b ${i===ser.length-1?'cur':''}" data-tip="${+m.slice(5)}월 · 수량 ${q?fmtN(q):'–'} · 단가 ${p!=null?fmtP(p)+'원':'–'} · 매출 ${a?fmtM(a)+'백만원':'–'}"><i style="height:${Math.max(q/mx*100,1)}%"></i><em>${+m.slice(5)}월</em></div>`).join('')}
-    <svg viewBox="0 0 100 100" preserveAspectRatio="none">${pts.length>1?`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="#B87333" stroke-width="2.5" vector-effect="non-scaling-stroke"/>`:''}${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#B87333" vector-effect="non-scaling-size"/>`).join('')}</svg></div>
-    <div class="legend"><i></i>거래량 <b></b>평균단가</div>
-    <table><thead><tr><th></th>${ser.map(x=>`<th class="num">${+x[0].slice(5)}월</th>`).join('')}</tr></thead><tbody><tr><td class="sub">거래량</td>${ser.map(x=>`<td class="num">${x[1]?fmtN(x[1]):'·'}</td>`).join('')}</tr><tr><td class="sub">단가</td>${ser.map(x=>`<td class="num">${x[2]!=null?fmtP(x[2]):'·'}</td>`).join('')}</tr><tr><td class="sub">매출</td>${ser.map(x=>`<td class="num">${x[3]?fmtM(x[3]):'·'}</td>`).join('')}</tr></tbody></table></div>`;
+function miniChart(ser,unit){ // ser: [ym, qty, price, amt]
+  const W=640,H=230,L=78,R=78,T=18,B=36,n=ser.length,iw=(W-L-R)/n;
+  const ps=ser.filter(x=>x[2]!=null).map(x=>x[2]);
+  const pmax=ps.length?Math.max(...ps):1, pmin=ps.length?Math.min(...ps):0;
+  const hi=pmax+(pmax-pmin||pmax*0.2)*0.25, lo=Math.max(0,pmin-(pmax-pmin||pmax*0.2)*0.25);
+  const qmax=Math.max(...ser.map(x=>x[1]),1);
+  const py=p=>T+(H-T-B)*(1-(p-lo)/(hi-lo||1)), qy=q=>T+(H-T-B)*(1-q/qmax);
+  const bars=ser.map(([m,q],i)=>q?`<rect x="${L+i*iw+iw*0.22}" y="${qy(q)}" width="${iw*0.56}" height="${H-B-qy(q)}" fill="#C6D0DA" rx="3"/>`:'').join('');
+  let segs=[],cur=[];
+  ser.forEach((x,i)=>{ if(x[2]==null){ if(cur.length>1) segs.push(cur); cur=[]; } else cur.push(`${L+i*iw+iw/2},${py(x[2])}`); });
+  if(cur.length>1) segs.push(cur);
+  const line=segs.map(p=>`<polyline points="${p.join(' ')}" fill="none" stroke="#B87333" stroke-width="2.4" stroke-linejoin="round"/>`).join('');
+  const dots=ser.map((x,i)=>x[2]==null?'':`<circle cx="${L+i*iw+iw/2}" cy="${py(x[2])}" r="3.4" fill="#B87333"/>`).join('');
+  const xl=ser.map(([m],i)=>`<text class="ax" x="${L+i*iw+iw/2}" y="${H-12}" text-anchor="middle">${+m.slice(5)}월</text>`).join('');
+  const hits=ser.map(([m,q,p,a],i)=>`<rect class="hit" x="${L+i*iw}" y="${T}" width="${iw}" height="${H-T-B}" data-tip="${+m.slice(5)}월 · ${q?`거래량 ${fmtN(q)}${unit} · 단가 ${p!=null?fmtP(p)+'원':'무상'} · 매출 ${fmtM(a)}백만원`:'거래 없음'}"/>`).join('');
+  return `<div class="chart"><div class="tip"></div><svg viewBox="0 0 ${W} ${H}">
+    <text class="ax" x="6" y="${T+11}">${fmtP(hi)}</text><text class="ax" x="6" y="${H-B}">${fmtP(lo)}</text>
+    <text class="ax" x="${W-6}" y="${T+11}" text-anchor="end">${fmtN(qmax)}${unit}</text><text class="ax" x="${W-6}" y="${H-B}" text-anchor="end">0</text>
+    <line x1="${L}" y1="${H-B}" x2="${W-R}" y2="${H-B}" stroke="#E3DCCF" stroke-width="1"/>
+    ${bars}${line}${dots}${xl}${hits}</svg></div>
+    <div class="legend"><i></i>거래량(${unit}) <b></b>단가(원)</div>`;
 }
 function bindTips(root){ root.querySelectorAll('[data-tip]').forEach(el=>{ const box=el.closest('.dual,.bars,.chart'); const tip=box&&box.querySelector('.tip2,.tip'); if(!tip) return; const show=()=>{tip.textContent=el.dataset.tip;tip.style.display='block';}; el.addEventListener('mouseenter',show); el.addEventListener('touchstart',show,{passive:true}); el.addEventListener('mouseleave',()=>tip.style.display='none'); }); }
+function itemCard(r){
+  const ser=MONTHS.map(m=>[m,r.cells[m]?r.cells[m].q:0,r.cells[m]?r.cells[m].p:null,r.cells[m]?r.cells[m].a:0]);
+  const ps=ser.filter(x=>x[2]!=null).map(x=>x[2]);
+  const ch=ps.length>1?(ps[ps.length-1]-ps[0])/ps[0]*100:null;
+  return `<div class="pc"><h3>${esc(r.label)}<span class="sub">올해 누계 ${fmtN(r.ytdQ)} kg · ${fmtM(r.ytdA)}백만원 ${ch!=null?`<span class="delta ${ch>0?'up':ch<0?'down':''}">단가 ${ch>0?'+':''}${ch.toFixed(0)}%</span>`:''}</span></h3>
+    ${miniChart(ser,'kg')}
+    <table><thead><tr><th></th>${ser.map(x=>`<th class="num">${+x[0].slice(5)}월</th>`).join('')}</tr></thead><tbody>
+    <tr><td class="sub">거래량(kg)</td>${ser.map(x=>`<td class="num">${x[1]?fmtN(x[1]):'·'}</td>`).join('')}</tr>
+    <tr><td class="sub">단가(원)</td>${ser.map(x=>`<td class="num">${x[2]!=null?fmtP(x[2]):'·'}</td>`).join('')}</tr>
+    <tr><td class="sub">매출(백만원)</td>${ser.map(x=>`<td class="num">${x[3]?fmtM(x[3]):'·'}</td>`).join('')}</tr></tbody></table></div>`;
+}
 function renderDetail(){
   const s=cur; document.querySelectorAll('#d-tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===dtab));
   $('d-head').innerHTML=`<div><h1>${esc(s.name)}</h1><div class="meta"><div><b>담당자</b><span class="own me">${esc(s.own)}</span></div><div><b>부문</b>${s.bu}</div><div><b>거래 품목</b>${s.items.length}개</div><div><b>사업장</b>${s.sites.length}곳</div><div><b>입찰</b>${s.bids.length}건</div></div></div><div class="kpi"><div><div class="n">${s.age}일</div><div class="l">마지막 거래</div></div><div><div class="n">${fmtM(s.q3)}</div><div class="l">최근 3개월</div></div><div><div class="n">${fmtM(s.ytd)}</div><div class="l">올해 누계 매출(백만원)</div></div></div>`;
@@ -419,13 +442,13 @@ function renderDetail(){
     const rows=itemRows(s.tx); const ms={}; for(const t of s.tx) ms[ym(t.d)]=(ms[ym(t.d)]||0)+t.a;
     const recent=s.tx.slice(0,5);
     b.innerHTML=`    <div class="panel sec"><h2>월별 매출 (백만원)</h2>${bars(MONTHS.map(m=>[m,ms[m]||0]))}</div>
-    <div class="panel sec"><h2>품목별 월별 수량·평균단가·매출 <span class="sub">· 위 줄 수량 / 아래 줄 평균단가(원) · 무상(1+1)은 수량에만 포함</span></h2><div class="mtab">${monthTable(rows)}</div></div>
+    <div class="panel sec"><h2>품목별 월별 거래량·평균단가 <span class="sub">· 위 줄 거래량(kg) / 아래 줄 평균단가(원/kg) · 무상(1+1)은 거래량에만 포함</span></h2><div class="mtab">${monthTable(rows)}</div></div>
     <div class="cat">품목별 그래프</div><div class="items">${rows.map(itemCard).join('')}</div>
-    <div class="cat">최근 거래</div><div class="panel sec"><h2>최근 거래 5건</h2><table><thead><tr><th>일자</th><th>품목</th><th class="num">수량</th><th class="num">단가(원)</th><th class="num">금액(원)</th><th>적요</th></tr></thead><tbody>${recent.map(t=>`<tr><td>${fmtDate(t.d)}</td><td class="name">${esc(t.i)}</td><td class="num">${fmtN(t.q)}</td><td class="num">${t.p!=null?fmtP(t.p):'<span class="sub">무상</span>'}</td><td class="num">${fmtN(t.a)}</td><td class="sub">${esc(t.m)}</td></tr>`).join('')}</tbody></table></div>`;
+    <div class="cat">최근 거래</div><div class="panel sec"><h2>최근 거래 5건</h2><table><thead><tr><th>일자</th><th>품목</th><th class="num">거래량(kg)</th><th class="num">단가(원)</th><th class="num">금액(원)</th><th>적요</th></tr></thead><tbody>${recent.map(t=>`<tr><td>${fmtDate(t.d)}</td><td class="name">${esc(t.i)}</td><td class="num">${fmtN(t.q)} kg</td><td class="num">${t.p!=null?fmtP(t.p):'<span class="sub">무상</span>'}</td><td class="num">${fmtN(t.a)}</td><td class="sub">${esc(t.m)}</td></tr>`).join('')}</tbody></table></div>`;
   }
   if(dtab==='memo'){
     const memos=[]; const seen=new Set(); for(const t of s.tx){ if(t.m&&!seen.has(t.m)){ seen.add(t.m); memos.push(t); } if(memos.length>=40) break; }
-    b.innerHTML=`<div class="panel"><h2>거래 메모 <span class="sub">· ERP 적요, 최근순</span></h2><ul class="tl">${memos.map(t=>`<li><div class="d">${fmtDate(t.d)}</div><div class="dot"></div><div><div class="t">${esc(t.i)} <span class="sub">· ${fmtN(t.q)} × ${fmtP(t.p)}원 · ${esc(t.n)}</span></div><div class="b">${esc(t.m)}</div></div></li>`).join('')||'<li><div></div><div></div><div class="sub">적요 메모가 없습니다</div></li>'}</ul></div>`;
+    b.innerHTML=`<div class="panel"><h2>거래 메모 <span class="sub">· ERP 적요, 최근순</span></h2><ul class="tl">${memos.map(t=>`<li><div class="d">${fmtDate(t.d)}</div><div class="dot"></div><div><div class="t">${esc(t.i)} <span class="sub">· ${fmtN(t.q)}kg × ${fmtP(t.p)}원/kg · ${esc(t.n)}</span></div><div class="b">${esc(t.m)}</div></div></li>`).join('')||'<li><div></div><div></div><div class="sub">적요 메모가 없습니다</div></li>'}</ul></div>`;
   }
   bindTipsLater=true;
   if(dtab==='info'){
@@ -490,7 +513,8 @@ function pChart(c){ // 단가 선(좌) + 거래량 막대(우)
   const dots=c.price.map((p,i)=>p==null?'':`<circle cx="${L+i*iw+iw/2}" cy="${py(p)}" r="2.6" fill="#B87333"/>`).join('');
   const xl=CLOSED.map((m,i)=>`<text class="ax" x="${L+i*iw+iw/2}" y="${H-10}" text-anchor="middle">${+m.slice(5)}월</text>`).join('');
   const hits=CLOSED.map((m,i)=>`<rect class="hit" x="${L+i*iw}" y="${T}" width="${iw}" height="${H-T-B}" data-tip="${+m.slice(5)}월 · 단가 ${c.price[i]==null?'–':fmtP(c.price[i])+'원'} · 거래량 ${c.qs[i]?fmtN(c.qs[i]/1000)+'톤':'–'}"/>`).join('');
-  return `<div class="chart"><div class="tip"></div><svg viewBox="0 0 ${W} ${H}"><text class="ax" x="4" y="${T+10}">${fmtP(pmax)}</text><text class="ax" x="4" y="${H-B}">${fmtP(pmin)}</text><text class="ax" x="${W-4}" y="${T+10}" text-anchor="end">${fmtN(qmax/1000)}t</text><text class="ax" x="${W-4}" y="${H-B}" text-anchor="end">0</text>${bars}<polyline points="${pts.join(' ')}" fill="none" stroke="#B87333" stroke-width="2.2"/>${dots}${xl}${hits}</svg></div>`;
+  return `<div class="chart"><div class="tip"></div><svg viewBox="0 0 ${W} ${H}"><text class="ax" x="4" y="${T+10}">${fmtP(pmax)}</text><text class="ax" x="4" y="${H-B}">${fmtP(pmin)}</text><text class="ax" x="${W-4}" y="${T+10}" text-anchor="end">${fmtN(qmax/1000)}t</text><text class="ax" x="${W-4}" y="${H-B}" text-anchor="end">0</text>${bars}<polyline points="${pts.join(' ')}" fill="none" stroke="#B87333" stroke-width="2.2"/>${dots}${xl}${hits}</svg></div>
+  <div class="legend"><i></i>거래량(톤) <b></b>단가(원/kg)</div>`;
 }
 function renderPrice(){
   const P=buildPrice(); const N=DATA.price_text||{};
@@ -500,11 +524,11 @@ function renderPrice(){
   let h='';
   if(pcat==='인사이트·이슈'){
     h+=`<div class="panel sec"><h2>핵심 인사이트</h2><ul class="ins">${(N.insights||[]).map(x=>`<li>${esc(x)}</li>`).join('')||'<li class="sub">업데이트 시 작성</li>'}</ul></div>`;
-    h+=`<div class="panel sec"><h2>이슈사항</h2><table class="issue"><thead><tr><th>제품군</th><th>품목</th><th class="num">단가</th><th class="num">거래량</th><th>내용</th></tr></thead><tbody>${(N.issues||[]).map(r=>`<tr><td class="sub">${esc(r[0])}</td><td class="name">${esc(r[1])}</td><td class="num"><span class="badge ${/^\+/.test(r[2])?'up':/^-/.test(r[2])?'dn':'flat'}">${esc(r[2])}</span></td><td class="num"><span class="badge ${/^\+/.test(r[3])?'up':/^-/.test(r[3])?'dn':'flat'}">${esc(r[3])}</span></td><td>${esc(r[4])}</td></tr>`).join('')}</tbody></table>${N.note?`<div class="note">${esc(N.note)}</div>`:''}</div>`;
-    h+=`<div class="panel sec"><h2>전 품목 변동 요약 <span class="sub">· 자동 계산</span></h2><table class="issue"><thead><tr><th>제품군</th><th>품목</th><th class="num">첫월→최근 단가</th><th class="num">단가</th><th class="num">거래량</th><th class="num">누계(톤)</th></tr></thead><tbody>${P.flatMap(c=>c.cards.map(x=>`<tr><td class="sub">${c.cat}</td><td class="name">${esc(x.item)}</td><td class="num">${fmtP(x.first)} → ${fmtP(x.last)}</td><td class="num"><span class="badge ${bcls(x.chg)}">${pct2(x.chg)}</span></td><td class="num"><span class="badge ${x.isNew?'flat':bcls(x.qchg)}">${pct2(x.qchg,x)}</span></td><td class="num">${fmtN(x.qty/1000)}</td></tr>`)).join('')}</tbody></table></div>`;
+    h+=`<div class="panel sec"><h2>이슈사항</h2><table class="issue"><thead><tr><th>제품군</th><th>품목</th><th class="num">단가<br>변동</th><th class="num">거래량<br>변동</th><th>내용</th></tr></thead><tbody>${(N.issues||[]).map(r=>`<tr><td class="sub">${esc(r[0])}</td><td class="name">${esc(r[1])}</td><td class="num"><span class="badge ${/^\+/.test(r[2])?'up':/^-/.test(r[2])?'dn':'flat'}">${esc(r[2])}</span></td><td class="num"><span class="badge ${/^\+/.test(r[3])?'up':/^-/.test(r[3])?'dn':'flat'}">${esc(r[3])}</span></td><td>${esc(r[4])}</td></tr>`).join('')}</tbody></table>${N.note?`<div class="note">${esc(N.note)}</div>`:''}</div>`;
+    h+=`<div class="panel sec"><h2>전 품목 변동 요약 <span class="sub">· 자동 계산</span></h2><table class="issue"><thead><tr><th>제품군</th><th>품목</th><th class="num">첫월→최근 단가(원/kg)</th><th class="num">단가<br>변동</th><th class="num">거래량<br>변동</th><th class="num">누계<br>거래량(톤)</th></tr></thead><tbody>${P.flatMap(c=>c.cards.map(x=>`<tr><td class="sub">${c.cat}</td><td class="name">${esc(x.item)}</td><td class="num">${fmtP(x.first)} → ${fmtP(x.last)}</td><td class="num"><span class="badge ${bcls(x.chg)}">${pct2(x.chg)}</span></td><td class="num"><span class="badge ${x.isNew?'flat':bcls(x.qchg)}">${pct2(x.qchg,x)}</span></td><td class="num">${fmtN(x.qty/1000)}</td></tr>`)).join('')}</tbody></table></div>`;
   } else {
     const c=P.find(x=>x.cat===pcat); if(!c) return $('price-body').innerHTML='';
-    h+=`<div class="items">${c.cards.map(x=>`<div class="pc"><h3>${esc(x.item)}<span class="badge ${bcls(x.chg)}">단가 ${pct2(x.chg)}</span><span class="badge ${x.isNew?'flat':bcls(x.qchg)}">거래량 ${pct2(x.qchg,x)}</span></h3><div class="line">${fmtP(x.first)} → ${fmtP(x.last)}원 · 월 ${fmtN(x.q1/1000)} → ${fmtN(x.q2/1000)}톤 · 누계 ${fmtN(x.qty/1000)}톤</div>${pChart(x)}</div>`).join('')}</div>`;
+    h+=`<div class="items">${c.cards.map(x=>`<div class="pc"><h3>${esc(x.item)}<span class="badge ${bcls(x.chg)}">단가 ${pct2(x.chg)}</span><span class="badge ${x.isNew?'flat':bcls(x.qchg)}">거래량 ${pct2(x.qchg,x)}</span></h3><div class="line">단가 ${fmtP(x.first)} → ${fmtP(x.last)}원/kg · 월평균 거래량 ${fmtN(x.q1/1000)} → ${fmtN(x.q2/1000)}톤 · 누계 ${fmtN(x.qty/1000)}톤</div>${pChart(x)}</div>`).join('')}</div>`;
     h+=`<details class="ptab panel" open><summary>월별 단가표 (원/kg)</summary><table><thead><tr><th>품목</th>${CLOSED.map(m=>`<th class="num">${+m.slice(5)}월</th>`).join('')}</tr></thead><tbody>${c.cards.map(x=>`<tr><td class="name">${esc(x.item)}</td>${x.price.map(p=>`<td class="num">${p==null?'–':fmtP(p)}</td>`).join('')}</tr>`).join('')}</tbody></table></details>`;
     h+=`<details class="ptab panel"><summary>월별 거래량표 (톤)</summary><table><thead><tr><th>품목</th>${CLOSED.map(m=>`<th class="num">${+m.slice(5)}월</th>`).join('')}</tr></thead><tbody>${c.cards.map(x=>`<tr><td class="name">${esc(x.item)}</td>${x.qs.map(q=>`<td class="num">${q?fmtN(q/1000):'–'}</td>`).join('')}</tr>`).join('')}</tbody></table></details>`;
     if(c.minor.length) h+=`<div class="minor">단월 거래: ${c.minor.map(esc).join(', ')}</div>`;
