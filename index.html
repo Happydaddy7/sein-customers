@@ -237,7 +237,7 @@ th{white-space:nowrap}
     <section class="view on" id="v-mine">
       <div class="top"><div><h1 id="mine-title"></h1><p id="mine-sub"></p></div></div>
       <div class="panel">
-        <div class="filters"><input id="q" placeholder="거래처명·품목으로 찾기" oninput="renderMine()">
+        <div class="filters"><input id="q" placeholder="거래처명·품목으로 찾기 (품목 입력 시 해당 품목만 표시)" oninput="renderMine()">
           </div>
         <table><thead><tr><th>거래처</th><th class="rep">담당자</th><th class="num br">월평균 매출<br>(백만원)</th><th>품목</th><th class="num">품목 최근<br>단가(원/kg)</th><th class="num">품목 월평균<br>거래량(kg)</th></tr></thead><tbody id="mine-body"></tbody></table>
         <div class="note" id="mine-note"></div>
@@ -381,10 +381,16 @@ function renderMine(){
   const all=curRep==='__all__';
   const mine=SUP.filter(s=>(all||s.own===curRep)&&s.bu===curBU);
   $('mine-title').textContent=all?`전체 거래처 · ${curBU}`:`${curRep} 담당 거래처 · ${curBU}`;
-  $('mine-sub').textContent=`${mine.length}개 · 월평균 매출 합계 ${fmtM(mine.reduce((a,s)=>a+s.mavg,0))}백만원${all?` · 담당자 ${new Set(mine.map(s=>s.own)).size}명`:''}`;
   $('v-mine').classList.toggle('hidecol',!all);
   $('mine-note').textContent=`월평균 = ${CLOSED[0].slice(0,4)}년 ${+CLOSED[0].slice(5)}~${+LASTM.slice(5)}월 마감 ${CLOSED.length}개월 기준 (${+ym(TODAY).slice(5)}월 제외) · 최근 단가 = 유상 거래 중 가장 최근 단가(마우스를 올리면 거래일·직전 단가, ! 는 직전 대비 15% 이상 차이) · 입찰은 슬랙 #0-06입찰공고 및 입찰 트래커에서 거래처명 매칭`;
-  const rows=mine.filter(s=>!q||(s.name+' '+s.items.join(' ')).toLowerCase().includes(q)).sort((a,b)=>b.mavg-a.mavg);
+  const nameHit=s=>s.name.toLowerCase().includes(q);
+  const itemHit=x=>x.i.toLowerCase().includes(q);
+  const itemMode=!!q&&mine.some(s=>s.istat.some(itemHit))&&!mine.some(nameHit);
+  let rows=mine.filter(s=>!q||nameHit(s)||s.istat.some(itemHit));
+  if(itemMode) rows=rows.map(s=>({...s,istat:s.istat.filter(itemHit),msum:s.istat.filter(itemHit).reduce((a,x)=>a+x.mq,0)})).sort((a,b)=>b.msum-a.msum);
+  else rows=rows.sort((a,b)=>b.mavg-a.mavg);
+  if(itemMode){ const tq=rows.reduce((a,s)=>a+s.msum,0); $('mine-sub').textContent=`"${$('q').value}" 검색 · 거래처 ${rows.length}곳 · 해당 품목 월평균 거래량 합계 ${fmtN(tq)} kg`; }
+  else $('mine-sub').textContent=`${mine.length}개 · 월평균 매출 합계 ${fmtM(mine.reduce((a,s)=>a+s.mavg,0))}백만원${all?` · 담당자 ${new Set(mine.map(s=>s.own)).size}명`:''}`;
   $('mine-body').innerHTML=rows.map(s=>{ const it=s.istat.length?s.istat:[{i:'–',last:null,mq:0}]; const n=it.length; return it.map((x,j)=>`<tr class="row ${j===0?'grp':''} ${j===n-1?'last':''}" onclick="openDetail('${esc(s.k)}')"><td class="cust" title="${esc(s.name)}">${j===0?`<span class="name">${esc(s.name)}</span>`:''}</td><td class="rep">${j===0?esc(s.own):''}</td><td class="num br">${j===0?fmtM(s.mavg):''}</td><td class="it" title="${esc(x.i)}">${esc(x.i)}</td><td class="num" title="${x.last!=null?`${fmtDate(x.ld)} 거래 단가${x.prev!=null?` · 직전 ${fmtP(x.prev)}원`:''}`:''}">${x.last!=null?fmtP(x.last)+(x.odd?' <span class="warn" title="직전 단가와 15% 이상 차이 — ERP 입력 확인 필요">!</span>':''):'–'}</td><td class="num">${x.mq?fmtN(x.mq):'–'}</td></tr>`).join(''); }).join('')||'<tr><td colspan="6" class="empty">해당하는 거래처가 없습니다</td></tr>';
 }
 function openDetail(k){ cur=SUP.find(s=>s.k===k); dtab='trade'; go('detail',true); push({v:'detail',k,t:dtab}); renderDetail(); }
