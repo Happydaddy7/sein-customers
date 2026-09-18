@@ -159,12 +159,12 @@ th{white-space:nowrap}
 .pc .line{font-size:12px;color:var(--ink-2);margin:4px 0 8px}
 .pc svg{width:100%;height:auto;display:block}
 .pc .chart{position:relative}
-.pc .tip{position:absolute;top:4px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;font-size:12px;padding:5px 10px;border-radius:6px;white-space:nowrap;pointer-events:none;display:none;z-index:2}
+.pc .tip{position:absolute;top:0;left:0;background:var(--navy);color:#fff;font-size:12px;padding:5px 10px;border-radius:6px;white-space:nowrap;pointer-events:none;display:none;z-index:2}
 .pc .hit{fill:transparent;cursor:crosshair}.pc .hit:hover{fill:rgba(34,48,63,.06)}
 .dual,.bars{position:relative}
 .dual .b,.bars .b{cursor:crosshair;border-radius:4px}
 .dual .b:hover,.bars .b:hover{background:rgba(34,48,63,.05)}
-.tip2{position:absolute;top:-2px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;font-size:12px;padding:5px 10px;border-radius:6px;white-space:nowrap;pointer-events:none;display:none;z-index:3}
+.tip2{position:absolute;top:0;left:0;background:var(--navy);color:#fff;font-size:12px;padding:5px 10px;border-radius:6px;white-space:nowrap;pointer-events:none;display:none;z-index:3}
 .legend{padding:2px 18px 10px;font-size:11.5px;color:var(--ink-2)}.legend i{display:inline-block;width:12px;height:8px;background:#C9D3DD;border-radius:2px;margin-right:4px;vertical-align:middle}.legend b{display:inline-block;width:12px;height:2px;background:var(--copper);margin:0 4px 3px 12px;vertical-align:middle}
 .dual svg{position:absolute;left:18px;right:18px;top:14px;height:calc(100% - 32px);width:calc(100% - 36px);pointer-events:none;overflow:visible}
 .ptab{margin-top:14px}.ptab summary{cursor:pointer;font-size:13px;color:var(--navy);font-weight:600;padding:8px 14px}
@@ -428,7 +428,20 @@ function miniChart(ser,unit){ // ser: [ym, qty, price, amt]
     ${bars}${line}${dots}${xl}${hits}</svg></div>
     <div class="legend"><i></i>거래량(${unit}) <b></b>단가(원)</div>`;
 }
-function bindTips(root){ root.querySelectorAll('[data-tip]').forEach(el=>{ const box=el.closest('.dual,.bars,.chart'); const tip=box&&box.querySelector('.tip2,.tip'); if(!tip) return; const show=()=>{tip.textContent=el.dataset.tip;tip.style.display='block';}; el.addEventListener('mouseenter',show); el.addEventListener('touchstart',show,{passive:true}); el.addEventListener('mouseleave',()=>tip.style.display='none'); }); }
+function bindTips(root){ root.querySelectorAll('[data-tip]').forEach(el=>{
+  const box=el.closest('.dual,.bars,.chart'); const tip=box&&box.querySelector('.tip2,.tip'); if(!tip) return;
+  const move=(cx,cy)=>{ const r=box.getBoundingClientRect(); tip.textContent=el.dataset.tip; tip.style.display='block';
+    const w=tip.offsetWidth, h=tip.offsetHeight; let x=cx-r.left, y=cy-r.top-12;
+    x=Math.min(Math.max(x,w/2+2),r.width-w/2-2); if(y-h<2) y=cy-r.top+h+18;
+    tip.style.transform=`translate(${x-w/2}px,${y-h}px)`; };
+  const hide=()=>tip.style.display='none';
+  el.addEventListener('mouseenter',e=>move(e.clientX,e.clientY));
+  el.addEventListener('mousemove',e=>move(e.clientX,e.clientY));
+  el.addEventListener('mouseleave',hide);
+  el.addEventListener('touchstart',e=>{const t0=e.touches[0];move(t0.clientX,t0.clientY);},{passive:true});
+  el.addEventListener('touchmove',e=>{const t0=e.touches[0];move(t0.clientX,t0.clientY);},{passive:true});
+  el.addEventListener('touchend',hide);
+}); }
 function itemCard(r){
   const ser=MONTHS.map(m=>[m,r.cells[m]?r.cells[m].q:0,r.cells[m]?r.cells[m].p:null,r.cells[m]?r.cells[m].a:0]);
   const ps=ser.filter(x=>x[2]!=null).map(x=>x[2]);
@@ -544,7 +557,7 @@ function renderPrice(){
     if(c.minor.length) h+=`<div class="minor">단월 거래: ${c.minor.map(esc).join(', ')}</div>`;
   }
   $('price-body').innerHTML=h;
-  $('price-body').querySelectorAll('.hit').forEach(r=>{ const tip=r.closest('.chart').querySelector('.tip'); const show=()=>{tip.textContent=r.dataset.tip;tip.style.display='block';}; r.addEventListener('mouseenter',show); r.addEventListener('touchstart',e=>{show();},{passive:true}); r.addEventListener('mouseleave',()=>tip.style.display='none'); });
+  bindTips($('price-body'));
 }
 // ===== 월별 매출 추이 (관리자) =====
 let chipRep='';
