@@ -85,6 +85,10 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 
 .gate{min-height:100vh;background:var(--navy);display:flex;align-items:center;justify-content:center}
 .gate .card{background:var(--paper);width:560px;max-width:94vw;border-radius:12px;padding:32px}
+.share{margin:0 0 16px;font-size:12px;color:var(--ink-2)}
+.share button{padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:12.5px;font-weight:600;color:var(--ink)}
+.share button:hover{border-color:var(--copper);background:#FBF7F0}
+.share span{margin-left:8px}
 .install{display:flex;align-items:center;gap:12px;margin:0 0 20px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#FBF7F0;position:relative}
 .install .ic{width:34px;height:34px;border-radius:9px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:19px;flex:0 0 auto}
 .install .tx{flex:1;min-width:0;font-size:12px;color:var(--ink-2);line-height:1.5}
@@ -210,6 +214,7 @@ th{white-space:nowrap}
       <button class="btn primary" id="install-btn" onclick="doInstall()">설치</button>
       <button class="x" onclick="closeInstall()" aria-label="닫기">×</button>
     </div>
+    <div class="share"><button onclick="shareApp()">📤 이 앱 공유하기</button><span id="share-msg"></span></div>
     <div class="adminrow">
       <span class="sub">관리자</span>
       <input id="pw" type="password" placeholder="관리자 비밀번호" onkeydown="if(event.key==='Enter')adminLogin()">
@@ -351,6 +356,16 @@ function showInstall(kind){
 async function doInstall(){ if(!deferred) return; deferred.prompt(); const r=await deferred.userChoice; deferred=null; if(r.outcome==='accepted') closeInstall(); }
 function closeInstall(){ sessionStorage.setItem('noinstall','1'); const b=$('install'); if(b) b.style.display='none'; }
 setTimeout(()=>{ if(!deferred&&!standalone()&&!sessionStorage.getItem('noinstall')) showInstall('manual'); },1200);
+
+// ===== 공유 =====
+async function shareApp(){
+  const url=location.href.split('#')[0];
+  const txt=`세인 고객관리 앱입니다. 본인 이름을 누르면 담당 거래처가 나옵니다.\n${url}`;
+  try{ if(navigator.share){ await navigator.share({title:'세인 고객관리',text:'담당 거래처 현황 앱',url}); return; } }catch(e){ return; }
+  try{ await navigator.clipboard.writeText(txt); $('share-msg').textContent='주소를 복사했습니다 — 슬랙·카톡에 붙여넣기'; }
+  catch(e){ $('share-msg').textContent=url; }
+  setTimeout(()=>{$('share-msg').textContent='';},6000);
+}
 
 // ===== 게이트 =====
 let ME=null, ADMIN=false, curRep='', curBU='사료BU', comp='', cur=null;
